@@ -1,0 +1,45 @@
+package ru.yandex.practicum.accounts.service.feature.user;
+
+import lombok.experimental.UtilityClass;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
+
+import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.*;
+
+@UtilityClass
+public class UserValidator {
+
+    public static Mono<ResponseStatusException> validatePasswordChange(String password, String confirmPassword) {
+        if (!password.equals(confirmPassword)) {
+            return Mono.error(new ResponseStatusException(HttpStatusCode.valueOf(400), CONFIRMATION_ERROR_MSG));
+        } else {
+            return Mono.empty();
+        }
+    }
+
+    public static Mono<ResponseStatusException> validateBirthdate(String birthdate) {
+        if (birthdate == null) {
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, EMPTY_BIRTHDAY_ERROR_MSG));
+        }
+        
+        try {
+            LocalDate date = LocalDate.parse(birthdate);
+            OffsetDateTime birthdateOffset = date.atStartOfDay().atOffset(ZoneOffset.UTC);
+            OffsetDateTime eighteenYearsAgo = OffsetDateTime.now(ZoneOffset.UTC).minusYears(18);
+        
+            if (birthdateOffset.isAfter(eighteenYearsAgo)) {
+                return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_BIRTHDAY_ERROR_MSG));
+            }
+            return Mono.empty();
+        } catch (DateTimeParseException e) {
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_BIRTHDAY_FORMAT_ERROR_MSG));
+        }
+    }
+}

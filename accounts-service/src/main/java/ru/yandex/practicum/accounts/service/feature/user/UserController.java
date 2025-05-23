@@ -54,14 +54,8 @@ public class UserController {
     )
     @ApiResponse(responseCode = "200", description = "Список пользователей успешно получен")
     @GetMapping
-    public Flux<UserInfoResponse> getAllUsers() {
-        return userService.getAllUsers()
-                .map(user -> {
-                    UserInfoResponse userInfo = new UserInfoResponse();
-                    userInfo.setLogin(user.getLogin());
-                    userInfo.setName(user.getName());
-                    return userInfo;
-                });
+    public Flux<UserEntity> getAllUsers() {
+        return userService.getAllUsers();
     }
 
     @Operation(

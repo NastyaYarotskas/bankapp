@@ -7,71 +7,61 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
-import ru.yandex.practicum.accounts.service.feature.account.Account;
 import ru.yandex.practicum.accounts.service.feature.account.AccountEntity;
 import ru.yandex.practicum.accounts.service.feature.account.AccountService;
-import ru.yandex.practicum.accounts.service.feature.currency.Currency;
 import ru.yandex.practicum.accounts.service.feature.currency.CurrencyEnum;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+
+import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.EMPTY_REQUEST_ERROR_MSG;
+import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.LOING_ERROR_MSG;
+import static ru.yandex.practicum.accounts.service.feature.user.UserValidator.*;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final AccountService accountService;
     private final UserRepository userRepository;
 
     public Mono<User> createUser(UserCreateRequest request) {
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            return Mono.error(new ResponseStatusException(HttpStatusCode.valueOf(400),
-                    "Пароль и подтверждение пароля не совпадают"));
-        }
-
-        if (request.getBirthdate() != null) {
-            LocalDate birthdate = LocalDate.parse(request.getBirthdate()).atStartOfDay().atOffset(ZoneOffset.UTC).toLocalDate();
-
-            LocalDate eighteenYearsAgo = LocalDate.now().minusYears(18);
-
-            if (birthdate.isAfter(eighteenYearsAgo)) {
-                return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Пользователь должен быть старше 18 лет"));
-            }
-        } else {
-            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Дата рождения должна быть заполнена"));
-        }
-
-        return userRepository.findByLogin(request.getLogin())
-                .flatMap(existingUser -> Mono.<User>error(
-                        new ResponseStatusException(HttpStatusCode.valueOf(400),
-                                "Пользователь с логином " + request.getLogin() + " уже существует")
-                ))
-                .switchIfEmpty(
-                        createUserEntity(request)
-                                .flatMap(userEntity -> createUserAccounts(userEntity.getId())
-                                        .map(accounts -> Tuples.of(userEntity, accounts)))
-                                .map(this::mapToUser)
-                );
+        return validateRequest(request)
+                .then(validateExistingUser(request.getLogin()))
+                .then(Mono.just(request))
+                .flatMap(this::createUserWithAccounts);
     }
 
-    public Mono<User> getUserByLogin(String login) {
+    private Mono<Void> validateRequest(UserCreateRequest request) {
+        return Mono.just(request)
+                .filter(Objects::nonNull)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, EMPTY_REQUEST_ERROR_MSG)))
+                .flatMap(r -> validatePasswordChange(r.getPassword(), r.getConfirmPassword())
+                        .then(Mono.just(r)))
+                .flatMap(r -> validateBirthdate(r.getBirthdate())
+                        .then(Mono.just(r)))
+                .then();
+    }
+
+    private Mono<Void> validateExistingUser(String login) {
         return userRepository.findByLogin(login)
-                .flatMap(userEntity -> accountService.findByUserId(userEntity.getId())
-                        .collectList()
-                        .map(accountEntities -> mapToUser(Tuples.of(userEntity, accountEntities))))
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatusCode.valueOf(404), "Пользователь с логином " + login + " не найден")));
+                .hasElement()
+                .flatMap(exists -> exists
+                        ? Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, LOING_ERROR_MSG.formatted(login)))
+                        : Mono.empty());
     }
 
-    public Flux<UserEntity> getAllUsers() {
-        return userRepository.findAll();
+    private Mono<User> createUserWithAccounts(UserCreateRequest request) {
+        return createUserEntity(request)
+                .flatMap(userEntity -> createUserAccounts(userEntity.getId())
+                        .map(accounts -> Tuples.of(userEntity, accounts)))
+                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()));
     }
 
     private Mono<UserEntity> createUserEntity(UserCreateRequest request) {
@@ -86,12 +76,11 @@ public class UserService {
                 .flatMap(userRepository::save);
     }
 
-
     private Mono<List<AccountEntity>> createUserAccounts(UUID userId) {
         List<AccountEntity> accountEntities = Arrays.stream(CurrencyEnum.values())
                 .map(currency -> AccountEntity.builder()
                         .currency(currency.name())
-                        .userId(userId)  // Добавляем userId
+                        .userId(userId)
                         .build())
                 .toList();
 
@@ -99,31 +88,16 @@ public class UserService {
                 .collectList();
     }
 
-    private User mapToUser(Tuple2<UserEntity, List<AccountEntity>> tuple) {
-        UserEntity userEntity = tuple.getT1();
-        List<Account> accounts = tuple.getT2().stream()
-                .map(this::mapToAccount)
-                .toList();
-
-        return User.builder()
-                .id(userEntity.getId())
-                .login(userEntity.getLogin())
-                .name(userEntity.getName())
-                .password(userEntity.getPassword())
-                .birthdate(userEntity.getBirthdate())
-                .accounts(accounts)
-                .build();
+    public Mono<User> getUserByLogin(String login) {
+        return userRepository.findByLogin(login)
+                .flatMap(userEntity -> accountService.findByUserId(userEntity.getId())
+                        .collectList()
+                        .map(accountEntities -> UserMapper.toUser(userEntity, accountEntities)))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatusCode.valueOf(404), LOING_ERROR_MSG.formatted(login))));
     }
 
-    private Account mapToAccount(AccountEntity accountEntity) {
-        CurrencyEnum currencyEnum = CurrencyEnum.valueOf(accountEntity.getCurrency());
-        Account account = Account.builder()
-                .currency(new Currency(currencyEnum.getTitle(), currencyEnum.name()))
-                .value(accountEntity.getValue())
-                .exists(accountEntity.isExists())
-                .build();
-        account.setId(accountEntity.getId());
-        return account;
+    public Flux<UserEntity> getAllUsers() {
+        return userRepository.findAll();
     }
 
     public Mono<User> updateUserPassword(String login, EditPasswordRequest editPasswordRequest) {
@@ -134,7 +108,7 @@ public class UserService {
 
         return userRepository.findByLogin(login)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatusCode.valueOf(404),
-                        "Пользователь с логином " + login + " не найден")))
+                        LOING_ERROR_MSG.formatted(login))))
                 .flatMap(userEntity -> {
                     userEntity.setPassword(editPasswordRequest.getPassword());
                     return userRepository.save(userEntity);
@@ -142,14 +116,10 @@ public class UserService {
                 .flatMap(savedUser -> accountService.findByUserId(savedUser.getId())
                         .collectList()
                         .map(accounts -> Tuples.of(savedUser, accounts)))
-                .map(this::mapToUser);
+                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()));
     }
 
     public Mono<User> updateUserAccounts(String login, User user) {
-        if (!login.equals(user.getLogin())) {
-            return Mono.error(new RuntimeException("Логин в URL не совпадает с логином в запросе"));
-        }
-
         if (user.getBirthdate() != null) {
             LocalDate eighteenYearsAgo = LocalDate.now().minusYears(18);
             LocalDate birthdate = user.getBirthdate().toLocalDate();
@@ -189,6 +159,6 @@ public class UserService {
                             .collectList()
                             .map(accounts -> Tuples.of(userEntity, accounts));
                 })
-                .map(this::mapToUser);
+                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()));
     }
 }
