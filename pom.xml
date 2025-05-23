@@ -17,6 +17,8 @@
     <description>Bank Project</description>
 
     <modules>
+        <module>front-ui</module>
+        <module>accounts-service</module>
     </modules>
 
     <properties>

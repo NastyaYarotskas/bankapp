@@ -1,0 +1,13 @@
+package ru.yandex.practicum.accounts.service.feature.account;
+
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+
+import java.util.UUID;
+
+@Repository
+public interface AccountRepository extends ReactiveCrudRepository<AccountEntity, UUID> {
+
+    Flux<AccountEntity> findByUserId(UUID userId);
+}
