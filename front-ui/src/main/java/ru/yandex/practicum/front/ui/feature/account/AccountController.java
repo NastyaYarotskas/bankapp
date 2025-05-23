@@ -13,63 +13,56 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
 public class AccountController {
 
-    @Autowired
-    private AccountClient accountClient;
+    private static final String MAIN_VIEW = "main.html";
+    private static final String SIGNUP_VIEW = "signup.html";
 
     @Autowired
+    private AccountClient accountClient;
+    @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private UserModelAttributes userModelAttributes;
 
     @GetMapping(value = {"/main", "/"})
     public Mono<String> getAccountsInfo(@AuthenticationPrincipal AccountDetails userDetails,
                                         Model model) {
         if (userDetails == null) {
-            return Mono.just("main.html");
+            return Mono.just(MAIN_VIEW);
         }
-        return accountClient.getAccountDetails(userDetails.getUsername())
-                .flatMap(user -> {
-                    model.addAttribute("login", user.getLogin());
-                    model.addAttribute("name", user.getName());
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-                    String formattedDate = user.getBirthdate().format(formatter);
-                    model.addAttribute("birthdate", formattedDate);
-                    model.addAttribute("accounts", user.getAccounts());
 
-                    return Mono.just("main.html");
+        return accountClient.getAccountDetails(userDetails.getUsername())
+                .map(user -> {
+                    userModelAttributes.populateUserAttributes(model, user);
+                    return MAIN_VIEW;
                 });
     }
 
     @GetMapping(value = "/signup")
     public Mono<String> getSignUpForm() {
-        return Mono.just("signup.html");
+        return Mono.just(SIGNUP_VIEW);
     }
 
     @PostMapping(value = "/signup")
     public Mono<String> registerUser(Model model, CreateUserRequest request) {
         return accountClient.createUser(request)
-                .flatMap(user -> Mono.just("redirect:/login"))
-                .onErrorResume(WebClientResponseException.class, ex -> {
-                    try {
-                        ErrorResponse error = objectMapper.readValue(
-                                ex.getResponseBodyAsString(),
-                                ErrorResponse.class
-                        );
-                        model.addAttribute("errors", List.of(error.error()));
-                        model.addAttribute("login", request.getLogin());
-                        model.addAttribute("name", request.getName());
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-                        model.addAttribute("birthdate", request.getBirthdate());
-                        return Mono.just("signup.html");
-                    } catch (IOException e) {
-                        return Mono.error(ex);
-                    }
-                });
+                .map(user -> "redirect:/login")
+                .onErrorResume(WebClientResponseException.class,
+                        ex -> handleSignupError(ex, model, request));
+    }
+
+    private Mono<String> handleSignupError(WebClientResponseException ex, Model model, CreateUserRequest request) {
+        return Mono.fromCallable(() -> {
+            ErrorResponse error = objectMapper.readValue(ex.getResponseBodyAsString(), ErrorResponse.class);
+            userModelAttributes.populateSignupModel(model, request, error);
+            return SIGNUP_VIEW;
+        }).onErrorResume(IOException.class, e -> Mono.error(ex));
     }
 
     @PostMapping(value = "/user/{login}/editPassword")
@@ -78,19 +71,20 @@ public class AccountController {
                                      @PathVariable("login") String login,
                                      EditPasswordRequest request) {
         return accountClient.editPassword(login, request)
-                .flatMap(user -> Mono.just("redirect:/main"))
-                .onErrorResume(WebClientResponseException.class, ex -> {
-                    try {
-                        ErrorResponse error = objectMapper.readValue(
-                                ex.getResponseBodyAsString(),
-                                ErrorResponse.class
-                        );
-                        model.addAttribute("passwordErrors", List.of(error.error()));
-                        return getAccountsInfo(userDetails, model);
-                    } catch (IOException e) {
-                        return Mono.error(ex);
-                    }
-                });
+                .map(user -> "redirect:/main")
+                .onErrorResume(WebClientResponseException.class,
+                        exception -> handleEditPasswordError(exception, userDetails, model));
+
+    }
+
+    private Mono<String> handleEditPasswordError(WebClientResponseException ex, AccountDetails userDetails, Model model) {
+        return Mono.fromCallable(() -> {
+                    ErrorResponse error = objectMapper.readValue(ex.getResponseBodyAsString(), ErrorResponse.class);
+                    model.addAttribute("passwordErrors", List.of(error.error()));
+                    return null;
+                })
+                .onErrorResume(IOException.class, e -> Mono.error(ex))
+                .then(getAccountsInfo(userDetails, model));
     }
 
     @PostMapping(value = "/user/{login}/editUserAccounts")
@@ -99,37 +93,49 @@ public class AccountController {
                                          @PathVariable("login") String login,
                                          UserUpdateRequest request) {
         return accountClient.getAccountDetails(login)
-                .flatMap(account -> {
-                    List<Account> accounts = account.getAccounts()
-                            .stream()
-                            .peek(acc -> acc.setExists(request.getAccount().contains(acc.getCurrency().getName())))
-                            .toList();
-                    var newBirthday = request.getBirthdate() != null && !request.getBirthdate().isEmpty()
-                            ? LocalDate.parse(request.getBirthdate()).atStartOfDay().atOffset(ZoneOffset.UTC)
-                            : account.getBirthdate();
-                    User user = User.builder()
-                            .id(account.getId())
-                            .login(login)
-                            .name(request.getName())
-                            .password(account.getPassword())
-                            .birthdate(newBirthday)
-                            .accounts(accounts)
-                            .build();
-                    return Mono.just(user);
-                })
+                .map(account -> updateUserFromRequest(account, request, login))
                 .flatMap(user -> accountClient.editUserAccounts(login, user))
-                .flatMap(user -> Mono.just("redirect:/main"))
-                .onErrorResume(WebClientResponseException.class, ex -> {
-                    try {
-                        ErrorResponse error = objectMapper.readValue(
-                                ex.getResponseBodyAsString(),
-                                ErrorResponse.class
-                        );
-                        model.addAttribute("userAccountsErrors", List.of(error.error()));
-                        return getAccountsInfo(userDetails, model);
-                    } catch (IOException e) {
-                        return Mono.error(ex);
-                    }
-                });
+                .map(user -> "redirect:/main")
+                .onErrorResume(WebClientResponseException.class,
+                        ex -> handleEditAccountsError(ex, userDetails, model));
+    }
+
+    private User updateUserFromRequest(User account, UserUpdateRequest request, String login) {
+        List<Account> updatedAccounts = updateAccounts(account.getAccounts(), request.getAccount());
+        OffsetDateTime newBirthday = parseBirthdate(request.getBirthdate(), account.getBirthdate());
+
+        return User.builder()
+                .id(account.getId())
+                .login(login)
+                .name(request.getName())
+                .password(account.getPassword())
+                .birthdate(newBirthday)
+                .accounts(updatedAccounts)
+                .build();
+    }
+
+    private List<Account> updateAccounts(List<Account> accounts, List<String> selectedAccounts) {
+        return accounts.stream()
+                .peek(acc -> acc.setExists(selectedAccounts.contains(acc.getCurrency().getName())))
+                .toList();
+    }
+
+    private OffsetDateTime parseBirthdate(String birthdate, OffsetDateTime defaultBirthdate) {
+        return birthdate != null && !birthdate.isEmpty()
+                ? LocalDate.parse(birthdate).atStartOfDay().atOffset(ZoneOffset.UTC)
+                : defaultBirthdate;
+    }
+
+    private Mono<String> handleEditAccountsError(WebClientResponseException ex,
+                                                 AccountDetails userDetails,
+                                                 Model model) {
+        return Mono.fromCallable(() -> {
+                    ErrorResponse error = objectMapper.readValue(ex.getResponseBodyAsString(),
+                            ErrorResponse.class);
+                    model.addAttribute("userAccountsErrors", List.of(error.error()));
+                    return null;
+                })
+                .onErrorResume(IOException.class, e -> Mono.error(ex))
+                .then(getAccountsInfo(userDetails, model));
     }
 }
