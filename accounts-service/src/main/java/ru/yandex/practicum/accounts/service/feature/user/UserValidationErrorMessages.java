@@ -11,4 +11,5 @@ public class UserValidationErrorMessages {
     public static final String INVALID_BIRTHDAY_FORMAT_ERROR_MSG = "Неверный формат даты";
     public static final String EMPTY_REQUEST_ERROR_MSG = "Запрос не может быть пустым";
     public static final String LOING_ERROR_MSG = "Пользователь с логином %s уже существует";
+    public static final String USER_NOT_FOUND_ERROR_MSG = "Пользователь с логином %s не найден";
 }

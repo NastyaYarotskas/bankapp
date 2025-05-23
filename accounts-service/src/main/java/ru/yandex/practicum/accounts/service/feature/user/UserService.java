@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.EMPTY_REQUEST_ERROR_MSG;
-import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.LOING_ERROR_MSG;
+import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.*;
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidator.*;
+import reactor.util.function.Tuple2;
 
 @Service
 @RequiredArgsConstructor
@@ -100,23 +100,26 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Mono<User> updateUserPassword(String login, EditPasswordRequest editPasswordRequest) {
-        if (!editPasswordRequest.getPassword().equals(editPasswordRequest.getConfirmPassword())) {
-            return Mono.error(new ResponseStatusException(HttpStatusCode.valueOf(400),
-                    "Пароль и подтверждение пароля не совпадают"));
-        }
-
-        return userRepository.findByLogin(login)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatusCode.valueOf(404),
-                        LOING_ERROR_MSG.formatted(login))))
-                .flatMap(userEntity -> {
-                    userEntity.setPassword(editPasswordRequest.getPassword());
-                    return userRepository.save(userEntity);
-                })
-                .flatMap(savedUser -> accountService.findByUserId(savedUser.getId())
-                        .collectList()
-                        .map(accounts -> Tuples.of(savedUser, accounts)))
+    public Mono<User> updateUserPassword(String login, EditPasswordRequest request) {
+        return validatePasswordChange(request.getPassword(), request.getConfirmPassword())
+                .then(findAndUpdateUser(login, request))
+                .flatMap(this::enrichWithAccounts)
                 .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()));
+    }
+
+    private Mono<UserEntity> findAndUpdateUser(String login, EditPasswordRequest request) {
+        return userRepository.findByLogin(login)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND_ERROR_MSG.formatted(login))))
+                .flatMap(userEntity -> {
+                    userEntity.setPassword(request.getPassword());
+                    return userRepository.save(userEntity);
+                });
+    }
+
+    private Mono<Tuple2<UserEntity, List<AccountEntity>>> enrichWithAccounts(UserEntity user) {
+        return accountService.findByUserId(user.getId())
+                .collectList()
+                .map(accounts -> Tuples.of(user, accounts));
     }
 
     public Mono<User> updateUserAccounts(String login, User user) {
