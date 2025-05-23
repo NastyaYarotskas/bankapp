@@ -42,4 +42,32 @@ public class UserValidator {
             return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_BIRTHDAY_FORMAT_ERROR_MSG));
         }
     }
+
+    public static Mono<ResponseStatusException> validateBirthdate(OffsetDateTime birthdate) {
+        if (birthdate == null) {
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, EMPTY_BIRTHDAY_ERROR_MSG));
+        }
+
+        try {
+            OffsetDateTime eighteenYearsAgo = OffsetDateTime.now(ZoneOffset.UTC).minusYears(18);
+
+            if (birthdate.isAfter(eighteenYearsAgo)) {
+                return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_BIRTHDAY_ERROR_MSG));
+            }
+            return Mono.empty();
+        } catch (DateTimeParseException e) {
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_BIRTHDAY_FORMAT_ERROR_MSG));
+        }
+    }
+
+    public static Mono<ResponseStatusException> validateAccounts(User user) {
+        boolean hasInvalidAccounts = user.getAccounts().stream()
+                .anyMatch(account -> !account.isExists() && account.getValue() != 0);
+
+        if (hasInvalidAccounts) {
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Для отключенных аккаунтов (exists=false) значение value должно быть 0"));
+        }
+        return Mono.empty();
+    }
 }

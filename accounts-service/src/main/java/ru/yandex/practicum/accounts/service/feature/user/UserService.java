@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
+import ru.yandex.practicum.accounts.service.feature.account.Account;
 import ru.yandex.practicum.accounts.service.feature.account.AccountEntity;
 import ru.yandex.practicum.accounts.service.feature.account.AccountService;
 import ru.yandex.practicum.accounts.service.feature.currency.CurrencyEnum;
@@ -22,7 +24,6 @@ import java.util.UUID;
 
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.*;
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidator.*;
-import reactor.util.function.Tuple2;
 
 @Service
 @RequiredArgsConstructor
@@ -116,52 +117,51 @@ public class UserService {
                 });
     }
 
-    private Mono<Tuple2<UserEntity, List<AccountEntity>>> enrichWithAccounts(UserEntity user) {
-        return accountService.findByUserId(user.getId())
+    private Mono<Tuple2<UserEntity, List<AccountEntity>>> enrichWithAccounts(UserEntity userEntity) {
+        return accountService.findByUserId(userEntity.getId())
                 .collectList()
-                .map(accounts -> Tuples.of(user, accounts));
+                .map(accounts -> Tuples.of(userEntity, accounts));
     }
 
     public Mono<User> updateUserAccounts(String login, User user) {
-        if (user.getBirthdate() != null) {
-            LocalDate eighteenYearsAgo = LocalDate.now().minusYears(18);
-            LocalDate birthdate = user.getBirthdate().toLocalDate();
+        return Mono.just(user)
+                .flatMap(r -> validateBirthdate(r.getBirthdate()).then(Mono.just(r)))
+                .flatMap(r -> validateAccounts(r).then(Mono.just(r)))
+                .then(findAndUpdateUserData(login, user))
+                .flatMap(userEntity -> updateUserAccountsData(userEntity, user.getAccounts()))
+                .flatMap(this::enrichWithAccounts)
+                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()));
+    }
 
-            if (birthdate.isAfter(eighteenYearsAgo)) {
-                return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Пользователь должен быть старше 18 лет"));
-            }
-        }
-
-        boolean hasInvalidAccounts = user.getAccounts().stream()
-                .anyMatch(account -> !account.isExists() && account.getValue() != 0);
-
-        if (hasInvalidAccounts) {
-            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Для отключенных аккаунтов (exists=false) значение value должно быть 0"));
-        }
-
+    private Mono<UserEntity> findAndUpdateUserData(String login, User user) {
         return userRepository.findByLogin(login)
-                .switchIfEmpty(Mono.error(new RuntimeException("Пользователь с логином " + login + " не найден")))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND_ERROR_MSG.formatted(login))))
                 .flatMap(userEntity -> {
                     userEntity.setName(user.getName());
                     userEntity.setBirthdate(user.getBirthdate());
                     return userRepository.save(userEntity);
-                })
-                .flatMap(userEntity -> {
-                    List<AccountEntity> accountEntities = user.getAccounts().stream()
-                            .map(account -> AccountEntity.builder()
-                                    .id(account.getId())
-                                    .currency(account.getCurrency().getName())
-                                    .value(account.getValue())
-                                    .exists(account.isExists())
-                                    .build())
-                            .toList();
+                });
+    }
 
+    private Mono<UserEntity> updateUserAccountsData(UserEntity userEntity, List<Account> userAccounts) {
+        return accountService.findByUserId(userEntity.getId())
+                .collectList()
+                .flatMap(accounts -> {
+                    List<AccountEntity> accountEntities = convertToAccountEntities(userAccounts);
                     return accountService.updateAccounts(userEntity.getId(), Flux.fromIterable(accountEntities))
                             .collectList()
-                            .map(accounts -> Tuples.of(userEntity, accounts));
-                })
-                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()));
+                            .thenReturn(userEntity);
+                });
+    }
+
+    private List<AccountEntity> convertToAccountEntities(List<Account> accounts) {
+        return accounts.stream()
+                .map(account -> AccountEntity.builder()
+                        .id(account.getId())
+                        .currency(account.getCurrency().getName())
+                        .value(account.getValue())
+                        .exists(account.isExists())
+                        .build())
+                .toList();
     }
 }
