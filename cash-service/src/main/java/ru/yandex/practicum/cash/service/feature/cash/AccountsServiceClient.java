@@ -1,6 +1,6 @@
 package ru.yandex.practicum.cash.service.feature.cash;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -8,8 +8,11 @@ import reactor.core.publisher.Mono;
 @Component
 public class AccountsServiceClient {
 
-    @Autowired
-    private WebClient accountsServiceWebClient;
+    private final WebClient accountsServiceWebClient;
+
+    public AccountsServiceClient(@LoadBalanced WebClient.Builder accountsServiceWebClientBuilder) {
+        this.accountsServiceWebClient = accountsServiceWebClientBuilder.build();
+    }
 
     public Mono<User> getAccountDetails(String login) {
         return accountsServiceWebClient.get()
