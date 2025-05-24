@@ -19,6 +19,7 @@
     <modules>
         <module>front-ui</module>
         <module>accounts-service</module>
+        <module>cash-service</module>
     </modules>
 
     <properties>

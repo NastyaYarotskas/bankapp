@@ -2,6 +2,7 @@ package ru.yandex.practicum.front.ui.feature.account;
 
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
+import ru.yandex.practicum.front.ui.feature.account.model.Account;
 import ru.yandex.practicum.front.ui.feature.account.model.User;
 import ru.yandex.practicum.front.ui.feature.account.request.CreateUserRequest;
 import ru.yandex.practicum.front.ui.feature.error.ErrorResponse;
@@ -19,6 +20,7 @@ public class UserModelAttributes {
         model.addAttribute("name", user.getName());
         model.addAttribute("birthdate", formatBirthdate(user.getBirthdate()));
         model.addAttribute("accounts", user.getAccounts());
+        model.addAttribute("currency", user.getAccounts().stream().map(Account::getCurrency).toList());
     }
 
     public void populateSignupModel(Model model, CreateUserRequest request, ErrorResponse error) {
