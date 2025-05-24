@@ -17,3 +17,4 @@ mvnw.cmd clean install    # Windows
 TODO:
 * encrypt password in accounts-service
 * get rid of currency enum in accounts-service
+* add db for exchange service?
