@@ -8,3 +8,27 @@ services:
       POSTGRES_DB: accounts_service_db
     ports:
       - "5430:5432"
+
+  consul-server:
+    image: hashicorp/consul:1.15
+    container_name: consul-server
+    command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
+    environment:
+      - CONSUL_LOCAL_CONFIG={"datacenter":"dc1", "log_level":"INFO", "server":true}
+    ports:
+      - "8500:8500" # UI
+      - "8600:8600/udp" # DNS
+      - "8300:8300" # Server RPC
+      - "8301:8301" # Serf LAN
+      - "8302:8302" # Serf WAN
+
+  consul-client:
+    image: hashicorp/consul:1.15
+    container_name: consul-client
+    command: "agent -node=client-1 -join=consul-server -client=0.0.0.0"
+    depends_on:
+      - consul-server
+    environment:
+      - CONSUL_LOCAL_CONFIG={"datacenter":"dc1", "log_level":"INFO"}
+    ports:
+      - "8501:8500"
