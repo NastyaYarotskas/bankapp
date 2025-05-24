@@ -1,0 +1,10 @@
+services:
+  accounts-service-db:
+    image: postgres:latest
+    container_name: accounts_service_db_container
+    environment:
+      POSTGRES_USER: sa
+      POSTGRES_PASSWORD: sa
+      POSTGRES_DB: accounts_service_db
+    ports:
+      - "5430:5432"
