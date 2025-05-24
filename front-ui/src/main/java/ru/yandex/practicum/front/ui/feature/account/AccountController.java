@@ -43,8 +43,10 @@ public class AccountController {
         }
 
         return accountsServiceClient.getAccountDetails(userDetails.getUsername())
-                .map(user -> {
-                    userModelAttributes.populateUserAttributes(model, user);
+                .zipWith(accountsServiceClient.getAllUsers().collectList())
+                .map(tuple -> {
+                    userModelAttributes.populateUserAttributes(model, tuple.getT1());
+                    model.addAttribute("users", tuple.getT2());
                     return MAIN_VIEW;
                 });
     }

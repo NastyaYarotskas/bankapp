@@ -3,6 +3,7 @@ package ru.yandex.practicum.front.ui.feature.account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.front.ui.feature.account.model.User;
 import ru.yandex.practicum.front.ui.feature.account.request.CreateUserRequest;
@@ -43,5 +44,12 @@ public class AccountsServiceClient {
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(User.class);
+    }
+
+    public Flux<User> getAllUsers() {
+        return accountsServiceWebClient.get()
+                .uri("/api/v1/users")
+                .retrieve()
+                .bodyToFlux(User.class);
     }
 }

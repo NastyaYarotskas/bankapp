@@ -1,4 +1,4 @@
-package ru.yandex.practicum.front.ui.feature.cash;
+package ru.yandex.practicum.front.ui.feature.transfer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,39 +11,46 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.front.ui.feature.account.AccountController;
 import ru.yandex.practicum.front.ui.feature.auth.CustomUserDetails;
+import ru.yandex.practicum.front.ui.feature.cash.CashChangeRequest;
+import ru.yandex.practicum.front.ui.feature.cash.CashServiceClient;
 import ru.yandex.practicum.front.ui.feature.error.ErrorResponse;
 
 import java.io.IOException;
 import java.util.List;
 
 @Controller
-public class CashController {
+public class TransferController {
 
     @Autowired
-    private CashServiceClient cashServiceClient;
+    private TransferServiceClient transferServiceClient;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private AccountController accountController;
 
-    @PostMapping(value = "/user/{login}/cash")
-    public Mono<String> processAccountTransaction(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                  Model model,
-                                                  @PathVariable("login") String login,
-                                                  CashChangeRequest request) {
-        return cashServiceClient.processAccountTransaction(login, request)
+    @PostMapping(value = "/user/{login}/transfer")
+    public Mono<String> transfer(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                 Model model,
+                                 @PathVariable("login") String login,
+                                 TransferRequest request) {
+        return transferServiceClient.transfer(login, request)
                 .then(Mono.fromCallable(() -> "redirect:/main"))
                 .onErrorResume(WebClientResponseException.class,
-                        ex -> handleAccountTransactionError(ex, userDetails, model));
+                        ex -> handleTransferError(ex, userDetails, model, request));
     }
 
-    private Mono<String> handleAccountTransactionError(WebClientResponseException ex,
-                                                       CustomUserDetails userDetails,
-                                                       Model model) {
+    private Mono<String> handleTransferError(WebClientResponseException ex,
+                                             CustomUserDetails userDetails,
+                                             Model model,
+                                             TransferRequest request) {
         return Mono.fromCallable(() -> {
                     ErrorResponse error = objectMapper.readValue(ex.getResponseBodyAsString(),
                             ErrorResponse.class);
-                    model.addAttribute("cashErrors", List.of(error.error()));
+                    if (request.getLogin().equals(request.getToLogin())) {
+                        model.addAttribute("transferErrors", List.of(error.error()));
+                    } else {
+                        model.addAttribute("transferOtherErrors", List.of(error.error()));
+                    }
                     return null;
                 })
                 .onErrorResume(IOException.class, e -> Mono.error(ex))

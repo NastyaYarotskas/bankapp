@@ -1,4 +1,4 @@
-package ru.yandex.practicum.front.ui.config;
+package ru.yandex.practicum.transfer.service.conf;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,21 +16,7 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient cashServiceWebClient(@Value("${cash.service.url}") String baseUrl) {
-        return WebClient.builder()
-                .baseUrl(baseUrl)
-                .build();
-    }
-
-    @Bean
     public WebClient exchangeServiceWebClient(@Value("${exchange.service.url}") String baseUrl) {
-        return WebClient.builder()
-                .baseUrl(baseUrl)
-                .build();
-    }
-
-    @Bean
-    public WebClient transferServiceWebClient(@Value("${transfer.service.url}") String baseUrl) {
         return WebClient.builder()
                 .baseUrl(baseUrl)
                 .build();
