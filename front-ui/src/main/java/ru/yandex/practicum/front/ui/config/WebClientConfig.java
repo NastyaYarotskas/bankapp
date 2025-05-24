@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
     @Bean
-    public WebClient accountServiceWebClient(@Value("${account.service.url}") String baseUrl) {
+    public WebClient accountsServiceWebClient(@Value("${account.service.url}") String baseUrl) {
         return WebClient.builder()
                 .baseUrl(baseUrl)
                 .build();

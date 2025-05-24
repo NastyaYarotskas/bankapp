@@ -2,6 +2,9 @@ package ru.yandex.practicum.front.ui.feature.account;
 
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
+import ru.yandex.practicum.front.ui.feature.account.model.User;
+import ru.yandex.practicum.front.ui.feature.account.request.CreateUserRequest;
+import ru.yandex.practicum.front.ui.feature.error.ErrorResponse;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;

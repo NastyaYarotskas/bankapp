@@ -1,4 +1,4 @@
-package ru.yandex.practicum.front.ui.feature.account;
+package ru.yandex.practicum.front.ui.feature.error;
 
 import java.time.Instant;
 

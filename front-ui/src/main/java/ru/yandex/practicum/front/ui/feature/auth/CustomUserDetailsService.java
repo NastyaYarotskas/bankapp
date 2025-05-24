@@ -1,4 +1,4 @@
-package ru.yandex.practicum.front.ui.feature.account;
+package ru.yandex.practicum.front.ui.feature.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -7,29 +7,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.front.ui.feature.account.AccountsServiceClient;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 @Service
-public class AccountDetailsService implements ReactiveUserDetailsService {
+public class CustomUserDetailsService implements ReactiveUserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private AccountClient accountClient;
+    private AccountsServiceClient accountsServiceClient;
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
-        return accountClient.getAccountDetails(username)
+        return accountsServiceClient.getAccountDetails(username)
                 .map(account ->
-                        AccountDetails.accountDetailsBuilder()
-                                .id(account.getId())
+                        CustomUserDetails.customUserDetailsBuilder()
                                 .username(account.getLogin())
                                 .password(passwordEncoder.encode(account.getPassword()))
-                                .birthdate(account.getBirthdate())
-                                .accounts(account.getAccounts())
                                 .authorities(Arrays.stream("USER".split(","))
                                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList())
                                 .accountNonExpired(true)

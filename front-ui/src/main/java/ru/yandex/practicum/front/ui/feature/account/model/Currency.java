@@ -1,4 +1,4 @@
-package ru.yandex.practicum.front.ui.feature.account;
+package ru.yandex.practicum.front.ui.feature.account.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

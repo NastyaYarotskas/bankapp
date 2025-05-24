@@ -1,6 +1,5 @@
-package ru.yandex.practicum.front.ui.feature.account;
+package ru.yandex.practicum.front.ui.feature.account.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
