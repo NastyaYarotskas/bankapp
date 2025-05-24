@@ -18,8 +18,8 @@ public class CurrencyController {
     private final List<Currency> currencies = new ArrayList<>();
 
     public CurrencyController() {
-        currencies.add(new Currency("USD", "Доллары", 0.1));
-        currencies.add(new Currency("CNY", "Юани", 0.2));
+        currencies.add(new Currency("USD", "Доллары", 1));
+        currencies.add(new Currency("CNY", "Юани", 1));
         currencies.add(new Currency("RUB", "Рубли", 1));
     }
 

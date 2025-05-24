@@ -143,13 +143,13 @@
                     <td style="font-weight:bold;">Перевод себе</td>
                     <td>
                         Со счета
-                        <select name="from_currency">
+                        <select name="fromCurrency">
                             <option th:each="eachCurrency : ${currency}" th:value="${eachCurrency.getName()}" th:text="${eachCurrency.getTitle()}"/>
                         </select>
                     </td>
                     <td>
                         На счет
-                        <select name="to_currency">
+                        <select name="toCurrency">
                             <option th:each="eachCurrency : ${currency}" th:value="${eachCurrency.getName()}" th:text="${eachCurrency.getTitle()}"/>
                         </select>
                     </td>
@@ -157,7 +157,7 @@
                         <input name="value" type="number" style="width:100%" required/>
                     </td>
                     <td style="text-align:right">
-                        <input hidden name="to_login" th:value="${login}"/>
+                        <input hidden name="toLogin" th:value="${login}"/>
                         <button>Перевести</button>
                     </td>
                 </tr>
@@ -174,13 +174,13 @@
                     <td style="font-weight:bold;">Перевод другому</td>
                     <td>
                         Со счета
-                        <select name="from_currency">
+                        <select name="fromCurrency">
                             <option th:each="eachCurrency : ${currency}" th:value="${eachCurrency.getName()}" th:text="${eachCurrency.getTitle()}"/>
                         </select>
                     </td>
                     <td>
                         На счет
-                        <select name="to_currency">
+                        <select name="toCurrency">
                             <option th:each="eachCurrency : ${currency}" th:value="${eachCurrency.getName()}" th:text="${eachCurrency.getTitle()}"/>
                         </select>
                     </td>
@@ -189,7 +189,7 @@
                     </td>
                     <td>
                         Кому
-                        <select name="to_login">
+                        <select name="toLogin">
                             <option th:each="user : ${users}" th:value="${user.getLogin()}" th:text="${user.getName()}"/>
                         </select>
                     </td>
