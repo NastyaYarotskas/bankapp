@@ -15,10 +15,22 @@ public class CashService {
 
     @Autowired
     private AccountsServiceClient accountsServiceClient;
+    @Autowired
+    private BlockerServiceClient blockerServiceClient;
 
     public Mono<Void> processAccountTransaction(String login, CashChangeRequest request) {
         return validateRequest(request)
-                .flatMap(validRequest -> processAccountOperation(login, validRequest))
+                .flatMap(validRequest ->
+                        blockerServiceClient.performOperation(new OperationRequest(login, request.getAction().name(), request.getValue()))
+                                .flatMap(checkResult -> {
+                                    if (checkResult.blocked()) {
+                                        return Mono.error(new ResponseStatusException(
+                                                HttpStatus.FORBIDDEN,
+                                                checkResult.message()
+                                        ));
+                                    }
+                                    return processAccountOperation(login, validRequest);
+                                }))
                 .then();
     }
 
@@ -50,9 +62,9 @@ public class CashService {
 
     private Account findAccountByCurrency(User user, String currency) {
         return user.getAccounts().stream()
-                .filter(acc -> acc.getCurrency() != null && 
-                        acc.getCurrency().getName().equals(currency) &&
-                        acc.isExists())
+                .filter(acc -> acc.getCurrency() != null &&
+                               acc.getCurrency().getName().equals(currency) &&
+                               acc.isExists())
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ERROR_ACCOUNT_NOT_FOUND));
     }
@@ -77,7 +89,7 @@ public class CashService {
     }
 
     private int calculateNewBalance(Account account, CashChangeRequest request) {
-        return request.getAction().equals(CashChangeRequest.Action.PUT) 
+        return request.getAction().equals(CashChangeRequest.Action.PUT)
                 ? account.getValue() + request.getValue()
                 : account.getValue() - request.getValue();
     }

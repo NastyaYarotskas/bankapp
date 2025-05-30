@@ -24,6 +24,7 @@
         <module>transfer-service</module>
         <module>exchange-generator-service</module>
         <module>gateway-service</module>
+        <module>blocker-service</module>
     </modules>
 
     <properties>

@@ -22,6 +22,8 @@ public class TransferController {
     private AccountsServiceClient accountsServiceClient;
     @Autowired
     private ExchangeServiceClient exchangeServiceClient;
+    @Autowired
+    private BlockerServiceClient blockerServiceClient;
 
     @PostMapping("/users/{login}/transfer")
     public Mono<Void> transfer(@RequestBody TransferRequest request) {
@@ -33,10 +35,26 @@ public class TransferController {
         return checkAccounts(request)
                 .flatMap(usersTuple -> {
                     User fromUser = usersTuple.getT2();
-                    return getConvertedAmount(request)
-                            .flatMap(convertedAmount -> executeTransfer(request, fromUser, convertedAmount));
+                    OperationRequest operationRequest = new OperationRequest(
+                        request.getLogin(),
+                        "TRANSFER",
+                        request.getValue()
+                    );
+                    
+                    return blockerServiceClient.performOperation(operationRequest)
+                        .flatMap(result -> {
+                            if (result.blocked()) {
+                                return Mono.error(new ResponseStatusException(
+                                    HttpStatus.FORBIDDEN,
+                                    "Операция заблокирована: " + result.message()
+                                ));
+                            }
+                            return getConvertedAmount(request)
+                                    .flatMap(convertedAmount -> 
+                                        executeTransfer(request, fromUser, convertedAmount));
+                        });
                 });
-    }
+}
 
     private Mono<Double> getConvertedAmount(TransferRequest request) {
         return exchangeServiceClient.getCurrencyRates()
