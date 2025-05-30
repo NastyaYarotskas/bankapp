@@ -32,3 +32,15 @@ services:
       - CONSUL_LOCAL_CONFIG={"datacenter":"dc1", "log_level":"INFO"}
     ports:
       - "8501:8500"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KC_HOSTNAME=keycloak
+    ports:
+      - "8080:8080"
+    command:
+      - start-dev
