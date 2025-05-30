@@ -47,6 +47,12 @@ spring:
             - Path=/transfer-service/**
           filters:
             - RewritePath=/transfer-service/?(?<segment>.*), /$\{segment}
+        - id: blocker-service-route
+          uri: lb://blocker-service
+          predicates:
+            - Path=/blocker-service/**
+          filters:
+            - RewritePath=/blocker-service/?(?<segment>.*), /$\{segment}
 
 #  security:
 #    oauth2:

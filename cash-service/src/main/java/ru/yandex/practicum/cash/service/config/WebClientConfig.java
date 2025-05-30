@@ -15,4 +15,11 @@ public class WebClientConfig {
         return WebClient.builder()
                 .baseUrl(baseUrl);
     }
+
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder blockerServiceWebClientBuilder(@Value("${blocker.service.url}") String baseUrl) {
+        return WebClient.builder()
+                .baseUrl(baseUrl);
+    }
 }
