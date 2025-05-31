@@ -1,0 +1,102 @@
+package ru.yandex.practicum.exchange.service.feature.currency;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+@SpringBootTest
+@AutoConfigureWebTestClient
+public class CurrencyControllerTest {
+
+    @Autowired
+    WebTestClient webTestClient;
+
+    @Test
+    void getAllCurrencies_currenciesArePresent_shouldReturnAllCurrencies() {
+        webTestClient.get()
+                .uri("/api/currencies")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(Currency.class)
+                .hasSize(3)
+                .contains(
+                        new Currency("USD", "Доллары", 1),
+                        new Currency("CNY", "Юани", 1),
+                        new Currency("RUB", "Рубли", 1)
+                );
+    }
+
+    @Test
+    void getCurrency_whenCurrencyExists_shouldReturnCurrency() {
+        webTestClient.get()
+                .uri("/api/currencies/usd")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Currency.class)
+                .isEqualTo(new Currency("USD", "Доллары", 1));
+    }
+
+    @Test
+    void getCurrency_whenCurrencyExistsIgnoreCase_shouldReturnCurrency() {
+        webTestClient.get()
+                .uri("/api/currencies/USD")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Currency.class)
+                .isEqualTo(new Currency("USD", "Доллары", 1));
+    }
+
+    @Test
+    void getCurrency_whenCurrencyNotExists_shouldReturnBadRequest() {
+        webTestClient.get()
+                .uri("/api/currencies/EURO")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void updateCurrency_whenCurrencyExists_shouldUpdateAndReturnCurrency() {
+        Currency updatedCurrency = new Currency("USD", "Доллары", 1.5);
+
+        webTestClient.put()
+                .uri("/api/currencies/usd")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedCurrency)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Currency.class)
+                .isEqualTo(updatedCurrency);
+
+        updatedCurrency = new Currency("USD", "Доллары", 1);
+
+        webTestClient.put()
+                .uri("/api/currencies/usd")
+                .bodyValue(updatedCurrency)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Currency.class)
+                .isEqualTo(updatedCurrency);
+    }
+
+    @Test
+    void updateCurrency_whenCurrencyNotExists_shouldReturnBadRequest() {
+        Currency updatedCurrency = new Currency("EURO", "Евро", 0.85);
+
+        webTestClient.put()
+                .uri("/api/currencies/EURO")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedCurrency)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+}
