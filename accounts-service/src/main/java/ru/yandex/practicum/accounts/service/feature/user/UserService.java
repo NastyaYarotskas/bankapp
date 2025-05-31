@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static ru.yandex.practicum.accounts.service.feature.notification.NotificationMessages.*;
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.*;
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidator.*;
 
@@ -59,7 +60,7 @@ public class UserService {
         return userRepository.findByLogin(login)
                 .hasElement()
                 .flatMap(exists -> exists
-                        ? Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, LOING_ERROR_MSG.formatted(login)))
+                        ? Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, LOGIN_ERROR_MSG.formatted(login)))
                         : Mono.empty());
     }
 
@@ -99,7 +100,7 @@ public class UserService {
                 .flatMap(userEntity -> accountService.findByUserId(userEntity.getId())
                         .collectList()
                         .map(accountEntities -> UserMapper.toUser(userEntity, accountEntities)))
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatusCode.valueOf(404), LOING_ERROR_MSG.formatted(login))));
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatusCode.valueOf(404), USER_NOT_FOUND_ERROR_MSG.formatted(login))));
     }
 
     public Flux<UserEntity> getAllUsers() {
@@ -111,17 +112,17 @@ public class UserService {
                 .then(findAndUpdateUser(login, request))
                 .flatMap(this::enrichWithAccounts)
                 .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()))
-                .doOnSuccess(updatedUser -> {
-                    String notificationMessage = "Пароль успешно обновлен";
+                .flatMap(user -> sendNotification(login, SUCCESS_PASSWORD_UPDATE_MESSAGE)
+                        .thenReturn(user)
+                )
+                .onErrorResume(error -> sendNotification(
+                        login,
+                        String.format(ERROR_PASSWORD_UPDATE_MESSAGE_TEMPLATE, error.getMessage())
+                ).then(Mono.error(error)));
+    }
 
-                    notificationServiceClient.sendNotification(
-                                    new NotificationRequest(login, notificationMessage)
-                            )
-                            .subscribe(
-                                    null,
-                                    error -> log.error("Failed to send update notification to user {}", login, error)
-                            );
-                });
+    private Mono<Void> sendNotification(String login, String message) {
+        return notificationServiceClient.sendNotification(new NotificationRequest(login, message));
     }
 
     private Mono<UserEntity> findAndUpdateUser(String login, EditPasswordRequest request) {
@@ -140,27 +141,33 @@ public class UserService {
     }
 
     public Mono<User> updateUserAccounts(String login, User user) {
+        return validateUserData(user)
+                .then(processUserUpdate(login, user))
+                .flatMap(updatedUser -> sendAccountUpdateNotification(login, user.getAccounts().size())
+                        .thenReturn(updatedUser));
+    }
+
+    private Mono<Void> validateUserData(User user) {
         return Mono.just(user)
-                .flatMap(r -> validateBirthdate(r.getBirthdate()).then(Mono.just(r)))
-                .flatMap(r -> validateAccounts(r).then(Mono.just(r)))
-                .then(findAndUpdateUserData(login, user))
+                .flatMap(r -> validateBirthdate(r.getBirthdate()))
+                .then(validateAccounts(user));
+    }
+
+    private Mono<User> processUserUpdate(String login, User user) {
+        return findAndUpdateUserData(login, user)
                 .flatMap(userEntity -> updateUserAccountsData(userEntity, user.getAccounts()))
                 .flatMap(this::enrichWithAccounts)
-                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()))
-                .doOnSuccess(updatedUser -> {
-                    String notificationMessage = String.format(
-                            "Данные вашего аккаунта успешно обновлены. " +
-                            "Изменено счетов: %d",
-                            user.getAccounts().size()
-                    );
+                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()));
+    }
 
-                    notificationServiceClient.sendNotification(
-                                    new NotificationRequest(login, notificationMessage)
-                            )
-                            .subscribe(
-                                    null,
-                                    error -> log.error("Failed to send update notification to user {}", login, error)
-                            );
+    private Mono<Void> sendAccountUpdateNotification(String login, int accountsCount) {
+        String notificationMessage = String.format(ACCOUNT_UPDATE_MESSAGE_TEMPLATE, accountsCount);
+
+        return notificationServiceClient
+                .sendNotification(new NotificationRequest(login, notificationMessage))
+                .onErrorResume(error -> {
+                    log.error("Failed to send update notification to user {}", login, error);
+                    return Mono.empty();
                 });
     }
 

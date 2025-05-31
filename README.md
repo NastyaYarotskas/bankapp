@@ -18,3 +18,4 @@ TODO:
 * encrypt password in accounts-service
 * get rid of currency enum in accounts-service
 * add db for exchange service?
+* currencies from one source
