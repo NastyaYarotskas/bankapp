@@ -1,10 +1,9 @@
 package ru.yandex.practicum.accounts.service.feature.user;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@Builder
 public class UserCreateRequest {
     private String login;
     private String name;

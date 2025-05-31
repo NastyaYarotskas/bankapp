@@ -18,7 +18,7 @@ public class UserValidator {
 
     public static Mono<ResponseStatusException> validatePasswordChange(String password, String confirmPassword) {
         if (!password.equals(confirmPassword)) {
-            return Mono.error(new ResponseStatusException(HttpStatusCode.valueOf(400), CONFIRMATION_ERROR_MSG));
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, CONFIRMATION_ERROR_MSG));
         } else {
             return Mono.empty();
         }
@@ -60,7 +60,7 @@ public class UserValidator {
         }
     }
 
-    public static Mono<ResponseStatusException> validateAccounts(User user) {
+    public static Mono<Void> validateAccounts(User user) {
         boolean hasInvalidAccounts = user.getAccounts().stream()
                 .anyMatch(account -> !account.isExists() && account.getValue() != 0);
 

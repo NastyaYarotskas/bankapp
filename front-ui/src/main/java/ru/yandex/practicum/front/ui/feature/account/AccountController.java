@@ -60,7 +60,6 @@ public class AccountController {
                 .map(user -> "redirect:/main")
                 .onErrorResume(WebClientResponseException.class,
                         exception -> handleEditPasswordError(exception, userDetails, model));
-
     }
 
     private Mono<String> handleEditPasswordError(WebClientResponseException ex, CustomUserDetails userDetails, Model model) {

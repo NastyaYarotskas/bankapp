@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 import java.util.Random;
 
 @Service
-public class RandomSuspiciousOperationDetector implements SuspiciousOperationDetector {
+public class RandomBlockerOperationDetector implements BlockerOperationDetector {
 
     private final Random random = new Random();
 

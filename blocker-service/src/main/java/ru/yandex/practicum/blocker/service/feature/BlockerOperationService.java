@@ -9,8 +9,9 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SuspiciousOperationService {
-    private final List<SuspiciousOperationDetector> detectors;
+public class BlockerOperationService {
+
+    private final List<BlockerOperationDetector> detectors;
 
     public Mono<OperationCheckResult> checkOperation(OperationContext context) {
         return Flux.fromIterable(detectors)

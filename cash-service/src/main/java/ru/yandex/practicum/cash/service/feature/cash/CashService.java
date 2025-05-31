@@ -28,7 +28,6 @@ public class CashService {
                         blockerServiceClient.performOperation(new OperationRequest(login, request.getAction().name(), request.getValue()))
                                 .flatMap(checkResult -> {
                                     if (checkResult.blocked()) {
-                                        sendErrorNotification(login, checkResult.message()); // Асинхронная отправка
                                         return Mono.error(new ResponseStatusException(
                                                 HttpStatus.FORBIDDEN,
                                                 checkResult.message()
@@ -37,21 +36,19 @@ public class CashService {
                                     return processAccountOperation(login, validRequest);
                                 }))
                 .flatMap(result -> {
-                    sendSuccessNotification(login, "Операция прошла успешно"); // Асинхронная отправка
+                    sendSuccessNotification(login, "Операция прошла успешно");
                     return Mono.just(result);
                 })
                 .onErrorResume(error -> {
                     String errorMessage = error instanceof ResponseStatusException ?
                             ((ResponseStatusException) error).getReason() :
                             "Операция была отменена: " + error.getMessage();
-
-                    sendErrorNotification(login, errorMessage); // Асинхронная отправка
+                    sendErrorNotification(login, errorMessage);
                     return Mono.error(error);
                 })
                 .then();
     }
 
-    // Асинхронная отправка успешного уведомления
     private void sendSuccessNotification(String login, String message) {
         notificationServiceClient.sendNotification(new NotificationRequest(login, message))
                 .subscribe(
@@ -60,7 +57,6 @@ public class CashService {
                 );
     }
 
-    // Асинхронная отправка уведомления об ошибке
     private void sendErrorNotification(String login, String message) {
         notificationServiceClient.sendNotification(new NotificationRequest(login, message))
                 .subscribe(
