@@ -2,7 +2,9 @@ package ru.yandex.practicum.blocker.service.feature;
 
 import reactor.core.publisher.Mono;
 
-public interface SuspiciousOperationDetector {
+public interface BlockerOperationDetector {
+
     Mono<Boolean> isOperationSuspicious(OperationContext context);
+
     String getDetectionAlgorithmName();
 }

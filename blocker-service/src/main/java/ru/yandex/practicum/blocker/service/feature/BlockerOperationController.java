@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 @RequiredArgsConstructor
 public class BlockerOperationController {
 
-    private final SuspiciousOperationService suspiciousOperationService;
+    private final BlockerOperationService blockerOperationService;
 
     @PostMapping("/api/operations")
     public Mono<OperationCheckResult> performOperation(@RequestBody Mono<OperationRequest> requestMono) {
@@ -25,7 +25,7 @@ public class BlockerOperationController {
                             .timestamp(OffsetDateTime.now())
                             .build();
 
-                    return suspiciousOperationService.checkOperation(context);
+                    return blockerOperationService.checkOperation(context);
                 });
     }
 }
