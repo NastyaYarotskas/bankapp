@@ -22,4 +22,11 @@ public class WebClientConfig {
         return WebClient.builder()
                 .baseUrl(baseUrl);
     }
+
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder notificationServiceWebClientBuilder(@Value("${notification.service.url}") String baseUrl) {
+        return WebClient.builder()
+                .baseUrl(baseUrl);
+    }
 }

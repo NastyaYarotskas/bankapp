@@ -1,4 +1,4 @@
-package ru.yandex.practicum.notification.service.config;
+package ru.yandex.practicum.accounts.service.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -11,9 +11,8 @@ public class WebClientConfig {
 
     @Bean
     @LoadBalanced
-    public WebClient frontServiceWebClient(@Value("${front.service.url}") String baseUrl) {
+    public WebClient.Builder notificationServiceWebClientBuilder(@Value("${notification.service.url}") String baseUrl) {
         return WebClient.builder()
-                .baseUrl(baseUrl)
-                .build();
+                .baseUrl(baseUrl);
     }
 }

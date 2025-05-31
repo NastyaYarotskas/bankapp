@@ -1,6 +1,7 @@
 package ru.yandex.practicum.accounts.service.feature.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,8 @@ import ru.yandex.practicum.accounts.service.feature.account.Account;
 import ru.yandex.practicum.accounts.service.feature.account.AccountEntity;
 import ru.yandex.practicum.accounts.service.feature.account.AccountService;
 import ru.yandex.practicum.accounts.service.feature.currency.CurrencyEnum;
+import ru.yandex.practicum.accounts.service.feature.notification.NotificationRequest;
+import ru.yandex.practicum.accounts.service.feature.notification.NotificationServiceClient;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -25,12 +28,14 @@ import java.util.UUID;
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.*;
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidator.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final AccountService accountService;
     private final UserRepository userRepository;
+    private final NotificationServiceClient notificationServiceClient;
 
     public Mono<User> createUser(UserCreateRequest request) {
         return validateRequest(request)
@@ -105,7 +110,18 @@ public class UserService {
         return validatePasswordChange(request.getPassword(), request.getConfirmPassword())
                 .then(findAndUpdateUser(login, request))
                 .flatMap(this::enrichWithAccounts)
-                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()));
+                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()))
+                .doOnSuccess(updatedUser -> {
+                    String notificationMessage = "Пароль успешно обновлен";
+
+                    notificationServiceClient.sendNotification(
+                                    new NotificationRequest(login, notificationMessage)
+                            )
+                            .subscribe(
+                                    null,
+                                    error -> log.error("Failed to send update notification to user {}", login, error)
+                            );
+                });
     }
 
     private Mono<UserEntity> findAndUpdateUser(String login, EditPasswordRequest request) {
@@ -130,7 +146,22 @@ public class UserService {
                 .then(findAndUpdateUserData(login, user))
                 .flatMap(userEntity -> updateUserAccountsData(userEntity, user.getAccounts()))
                 .flatMap(this::enrichWithAccounts)
-                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()));
+                .map(tuple -> UserMapper.toUser(tuple.getT1(), tuple.getT2()))
+                .doOnSuccess(updatedUser -> {
+                    String notificationMessage = String.format(
+                            "Данные вашего аккаунта успешно обновлены. " +
+                            "Изменено счетов: %d",
+                            user.getAccounts().size()
+                    );
+
+                    notificationServiceClient.sendNotification(
+                                    new NotificationRequest(login, notificationMessage)
+                            )
+                            .subscribe(
+                                    null,
+                                    error -> log.error("Failed to send update notification to user {}", login, error)
+                            );
+                });
     }
 
     private Mono<UserEntity> findAndUpdateUserData(String login, User user) {
