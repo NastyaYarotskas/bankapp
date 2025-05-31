@@ -1,5 +1,6 @@
 package ru.yandex.practicum.transfer.service.feature.transfer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import ru.yandex.practicum.transfer.service.feature.transfer.model.User;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 public class TransferController {
 
@@ -24,6 +26,8 @@ public class TransferController {
     private ExchangeServiceClient exchangeServiceClient;
     @Autowired
     private BlockerServiceClient blockerServiceClient;
+    @Autowired
+    private NotificationServiceClient notificationServiceClient;
 
     @PostMapping("/users/{login}/transfer")
     public Mono<Void> transfer(@RequestBody TransferRequest request) {
@@ -36,25 +40,53 @@ public class TransferController {
                 .flatMap(usersTuple -> {
                     User fromUser = usersTuple.getT2();
                     OperationRequest operationRequest = new OperationRequest(
-                        request.getLogin(),
-                        "TRANSFER",
-                        request.getValue()
+                            request.getLogin(),
+                            "TRANSFER",
+                            request.getValue()
                     );
-                    
+
                     return blockerServiceClient.performOperation(operationRequest)
-                        .flatMap(result -> {
-                            if (result.blocked()) {
-                                return Mono.error(new ResponseStatusException(
-                                    HttpStatus.FORBIDDEN,
-                                    "Операция заблокирована: " + result.message()
-                                ));
-                            }
-                            return getConvertedAmount(request)
-                                    .flatMap(convertedAmount -> 
-                                        executeTransfer(request, fromUser, convertedAmount));
-                        });
+                            .flatMap(result -> {
+                                if (result.blocked()) {
+                                    sendTransferNotification(
+                                            request.getLogin(),
+                                            "Перевод заблокирован: " + result.message(),
+                                            false
+                                    );
+                                    return Mono.error(new ResponseStatusException(
+                                            HttpStatus.FORBIDDEN,
+                                            "Операция заблокирована: " + result.message()
+                                    ));
+                                }
+                                return getConvertedAmount(request)
+                                        .flatMap(convertedAmount ->
+                                                executeTransfer(request, fromUser, convertedAmount)
+                                                        .doOnSuccess(__ ->
+                                                                sendTransferNotification(
+                                                                        request.getLogin(),
+                                                                        "Перевод успешно выполнен на сумму " + request.getValue(),
+                                                                        true
+                                                                )
+                                                        ));
+                            });
+                })
+                .onErrorResume(error -> {
+                    String errorMessage = error instanceof ResponseStatusException
+                            ? error.getMessage()
+                            : "Ошибка при переводе: " + error.getMessage();
+
+                    sendTransferNotification(request.getLogin(), errorMessage, false);
+                    return Mono.error(error);
                 });
-}
+    }
+
+    private void sendTransferNotification(String login, String message, boolean isSuccess) {
+        notificationServiceClient.sendNotification(new NotificationRequest(login, message))
+                .subscribe(
+                        null,
+                        e -> log.error("Failed to send transfer notification to {}", login, e)
+                );
+    }
 
     private Mono<Double> getConvertedAmount(TransferRequest request) {
         return exchangeServiceClient.getCurrencyRates()
@@ -86,7 +118,7 @@ public class TransferController {
                         HttpStatus.BAD_REQUEST,
                         "Счет отправителя не найден"
                 ));
-        
+
         fromAccount.setValue(fromAccount.getValue() - request.getValue());
 
         // Обновляем баланс отправителя и получателя
@@ -141,7 +173,7 @@ public class TransferController {
                             .findFirst()
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                     "Аккаунт с валютой %s не найден".formatted(request.getToCurrency())));
-                    
+
                     if (fromAccount.getValue() - request.getValue() < 0) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                 "На счету %s недостаточно средств".formatted(request.getFromCurrency())));

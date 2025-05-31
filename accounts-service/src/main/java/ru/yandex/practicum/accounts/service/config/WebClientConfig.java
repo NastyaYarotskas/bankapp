@@ -1,4 +1,4 @@
-package ru.yandex.practicum.cash.service.config;
+package ru.yandex.practicum.accounts.service.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -8,20 +8,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfig {
-
-    @Bean
-    @LoadBalanced
-    public WebClient.Builder accountsServiceWebClientBuilder(@Value("${account.service.url}") String baseUrl) {
-        return WebClient.builder()
-                .baseUrl(baseUrl);
-    }
-
-    @Bean
-    @LoadBalanced
-    public WebClient.Builder blockerServiceWebClientBuilder(@Value("${blocker.service.url}") String baseUrl) {
-        return WebClient.builder()
-                .baseUrl(baseUrl);
-    }
 
     @Bean
     @LoadBalanced
