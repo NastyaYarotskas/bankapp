@@ -45,7 +45,7 @@ public class UserValidator {
 
     public static Mono<ResponseStatusException> validateBirthdate(OffsetDateTime birthdate) {
         if (birthdate == null) {
-            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, EMPTY_BIRTHDAY_ERROR_MSG));
+            return Mono.empty();
         }
 
         try {

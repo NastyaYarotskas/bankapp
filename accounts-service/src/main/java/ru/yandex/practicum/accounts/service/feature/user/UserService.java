@@ -175,8 +175,12 @@ public class UserService {
         return userRepository.findByLogin(login)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND_ERROR_MSG.formatted(login))))
                 .flatMap(userEntity -> {
-                    userEntity.setName(user.getName());
-                    userEntity.setBirthdate(user.getBirthdate());
+                    if (user.getName() != null) {
+                        userEntity.setName(user.getName());
+                    }
+                    if (user.getBirthdate() != null) {
+                        userEntity.setBirthdate(user.getBirthdate());
+                    }
                     return userRepository.save(userEntity);
                 });
     }

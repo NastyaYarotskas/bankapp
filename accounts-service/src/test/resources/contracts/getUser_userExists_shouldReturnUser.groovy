@@ -18,8 +18,6 @@ Contract.make {
         body([
                 id: anyUuid(),
                 login: "test_edit_user_login",
-                name: "Test User",
-                birthdate: "1995-02-02T02:00:00+02:00",
                 accounts: [
                         [
                                 id: anyUuid(),

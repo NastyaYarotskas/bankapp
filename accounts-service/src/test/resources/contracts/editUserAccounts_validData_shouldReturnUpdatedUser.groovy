@@ -13,9 +13,7 @@ Contract.make {
         }
         body([
                 id: anyUuid(),
-                login: "test_edit_user_login",
-                name: "Test User",
-                birthdate: "1995-02-02T02:00:00+02:00"
+                login: "test_edit_user_login"
         ])
     }
 
@@ -27,7 +25,7 @@ Contract.make {
         body([
                 id: anyUuid(),
                 login: fromRequest().body('$.login'),
-                name: fromRequest().body('$.name'),
+                name: nonEmpty(),
                 birthdate: nonEmpty()
         ])
     }
