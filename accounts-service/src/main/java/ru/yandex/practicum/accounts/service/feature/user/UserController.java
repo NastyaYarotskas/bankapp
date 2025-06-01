@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 @Tag(name = "Пользователи", description = "API для управления пользователями")
@@ -92,6 +94,7 @@ public class UserController {
             @Parameter(description = "Обновленная информация о пользователе")
             User user
     ) {
+        log.info("User {} requested to edit his accounts", login);
         return userService.updateUserAccounts(login, user);
     }
 }

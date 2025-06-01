@@ -3,34 +3,35 @@ package ru.yandex.practicum.accounts.service.feature;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
+import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.accounts.service.BaseTest;
 import ru.yandex.practicum.accounts.service.feature.account.Account;
 import ru.yandex.practicum.accounts.service.feature.currency.Currency;
 import ru.yandex.practicum.accounts.service.feature.currency.CurrencyEnum;
 import ru.yandex.practicum.accounts.service.feature.notification.NotificationRequest;
-import ru.yandex.practicum.accounts.service.feature.notification.NotificationServiceClient;
 import ru.yandex.practicum.accounts.service.feature.user.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.*;
 
+@AutoConfigureStubRunner(
+        ids = "ru.yandex.practicum:notification-service:+:stubs:9001",
+        stubsMode = StubRunnerProperties.StubsMode.LOCAL
+)
+@Import(TestConfig.class)
 public class UserServiceTest extends BaseTest {
 
     @Autowired
     private UserRepository userRepository;
-    @MockitoBean
-    private NotificationServiceClient notificationServiceClient;
     @Autowired
     private UserService userService;
 
@@ -258,8 +259,6 @@ public class UserServiceTest extends BaseTest {
         String expectedNotificationMessage = "Пароль успешно обновлен";
 
         NotificationRequest expectedRequest = new NotificationRequest(login, expectedNotificationMessage);
-        when(notificationServiceClient.sendNotification(expectedRequest))
-                .thenReturn(Mono.empty());
 
         UserCreateRequest createRequest = UserCreateRequest.builder()
                 .login(login)
@@ -279,11 +278,6 @@ public class UserServiceTest extends BaseTest {
                 .assertNext(updatedUser -> {
                     Assertions.assertThat(updatedUser.getLogin()).isEqualTo(login);
                     Assertions.assertThat(updatedUser.getPassword()).isEqualTo(newPassword);
-
-                    verify(notificationServiceClient).sendNotification(argThat(request ->
-                            request.login().equals(login) &&
-                            request.message().equals(expectedNotificationMessage)
-                    ));
                 })
                 .verifyComplete();
 
@@ -303,8 +297,6 @@ public class UserServiceTest extends BaseTest {
         String expectedErrorMessage = "Не удалось обновить пароль. Причина: 400 BAD_REQUEST \"Пароль и подтверждение пароля не совпадают\"";
 
         NotificationRequest expectedRequest = new NotificationRequest(login, expectedErrorMessage);
-        when(notificationServiceClient.sendNotification(expectedRequest))
-                .thenReturn(Mono.empty());
 
         UserCreateRequest createRequest = UserCreateRequest.builder()
                 .login(login)
@@ -326,11 +318,6 @@ public class UserServiceTest extends BaseTest {
                             .isInstanceOf(ResponseStatusException.class);
                     Assertions.assertThat(error.getMessage())
                             .contains(CONFIRMATION_ERROR_MSG);
-
-                    verify(notificationServiceClient).sendNotification(argThat(request ->
-                            request.login().equals(login) &&
-                            request.message().equals(expectedErrorMessage)
-                    ));
                 })
                 .verify();
 
@@ -342,7 +329,7 @@ public class UserServiceTest extends BaseTest {
     }
 
     @Test
-    void updateUserAccounts_validData_shouldUpdateUserAndAccounts() {
+    void updateUserAccounts_validData_shouldUpdateUserAndAccounts() throws IOException {
         String login = "test_user";
         String name = "Test User";
         LocalDate birthDate = LocalDate.of(1990, 1, 1);
@@ -381,16 +368,6 @@ public class UserServiceTest extends BaseTest {
                 .accounts(updatedAccounts)
                 .build();
 
-        String expectedNotificationMessage = String.format(
-                "Данные вашего аккаунта успешно обновлены. Изменено счетов: %d",
-                updatedAccounts.size()
-        );
-
-        when(notificationServiceClient.sendNotification(argThat(request ->
-                request.login().equals(login) &&
-                request.message().equals(expectedNotificationMessage)
-        ))).thenReturn(Mono.empty());
-
         StepVerifier.create(
                         userService.createUser(createRequest)
                                 .flatMap(createdUser -> {
@@ -410,11 +387,6 @@ public class UserServiceTest extends BaseTest {
                             .ignoringFields("id")
                             .ignoringCollectionOrder()
                             .isEqualTo(updatedAccounts);
-
-                    verify(notificationServiceClient).sendNotification(argThat(request ->
-                            request.login().equals(login) &&
-                            request.message().equals(expectedNotificationMessage)
-                    ));
                 })
                 .verifyComplete();
     }

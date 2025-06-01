@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +17,6 @@ public class User {
     private String login;
     private String name;
     private String password;
-    private OffsetDateTime birthdate;
+    private String birthdate;
     private List<Account> accounts;
 }
