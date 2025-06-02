@@ -25,9 +25,9 @@ public class CurrencyControllerTest {
                 .expectBodyList(Currency.class)
                 .hasSize(3)
                 .contains(
-                        new Currency("USD", "Доллары", 1),
-                        new Currency("CNY", "Юани", 1),
-                        new Currency("RUB", "Рубли", 1)
+                        new Currency("USD", "Dollars", 1),
+                        new Currency("CNY", "Yuan", 1),
+                        new Currency("RUB", "Rubles", 1)
                 );
     }
 
@@ -40,7 +40,7 @@ public class CurrencyControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(Currency.class)
-                .isEqualTo(new Currency("USD", "Доллары", 1));
+                .isEqualTo(new Currency("USD", "Dollars", 1));
     }
 
     @Test
@@ -52,7 +52,7 @@ public class CurrencyControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(Currency.class)
-                .isEqualTo(new Currency("USD", "Доллары", 1));
+                .isEqualTo(new Currency("USD", "Dollars", 1));
     }
 
     @Test
@@ -66,7 +66,7 @@ public class CurrencyControllerTest {
 
     @Test
     void updateCurrency_whenCurrencyExists_shouldUpdateAndReturnCurrency() {
-        Currency updatedCurrency = new Currency("USD", "Доллары", 1.5);
+        Currency updatedCurrency = new Currency("USD", "Dollars", 1.5);
 
         webTestClient.put()
                 .uri("/api/currencies/usd")
@@ -77,7 +77,7 @@ public class CurrencyControllerTest {
                 .expectBody(Currency.class)
                 .isEqualTo(updatedCurrency);
 
-        updatedCurrency = new Currency("USD", "Доллары", 1);
+        updatedCurrency = new Currency("USD", "Dollars", 1);
 
         webTestClient.put()
                 .uri("/api/currencies/usd")
@@ -90,7 +90,7 @@ public class CurrencyControllerTest {
 
     @Test
     void updateCurrency_whenCurrencyNotExists_shouldReturnBadRequest() {
-        Currency updatedCurrency = new Currency("EURO", "Евро", 0.85);
+        Currency updatedCurrency = new Currency("EURO", "Euro", 0.85);
 
         webTestClient.put()
                 .uri("/api/currencies/EURO")

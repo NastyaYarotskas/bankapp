@@ -15,4 +15,9 @@ public class WebClientConfig {
         return WebClient.builder()
                 .baseUrl(baseUrl);
     }
+
+    @Bean
+    public WebClient exchangeServiceWebClient(WebClient.Builder exchangeServiceWebClientBuilder) {
+        return exchangeServiceWebClientBuilder.build();
+    }
 }

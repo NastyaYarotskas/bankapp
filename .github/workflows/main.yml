@@ -15,4 +15,7 @@ jobs:
           java-version: 21
 
       - name: Build project with Maven
-        run: mvn clean package --file pom.xml
+        run: mvn clean install -DskipTests --file pom.xml
+
+      - name: Run tests
+        run: mvn test --file pom.xml

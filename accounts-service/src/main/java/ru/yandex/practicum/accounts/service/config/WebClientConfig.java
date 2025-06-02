@@ -15,4 +15,9 @@ public class WebClientConfig {
         return WebClient.builder()
                 .baseUrl(baseUrl);
     }
+
+    @Bean
+    public WebClient notificationServiceWebClient(WebClient.Builder notificationServiceWebClientBuilder) {
+        return notificationServiceWebClientBuilder.build();
+    }
 }

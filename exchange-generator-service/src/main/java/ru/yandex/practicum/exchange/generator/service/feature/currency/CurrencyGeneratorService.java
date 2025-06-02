@@ -3,7 +3,6 @@ package ru.yandex.practicum.exchange.generator.service.feature.currency;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -36,9 +35,9 @@ public class CurrencyGeneratorService {
 
     private String getTitleForCode(String code) {
         return switch (code) {
-            case "USD" -> "Доллары";
-            case "CNY" -> "Юани";
-            case "RUB" -> "Рубли";
+            case "USD" -> "Dollars";
+            case "CNY" -> "Yuan";
+            case "RUB" -> "Rubles";
             default -> code;
         };
     }

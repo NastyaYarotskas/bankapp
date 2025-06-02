@@ -16,9 +16,9 @@ public class CurrencyController {
     private final List<Currency> currencies = new ArrayList<>();
 
     public CurrencyController() {
-        currencies.add(new Currency("USD", "Доллары", 1));
-        currencies.add(new Currency("CNY", "Юани", 1));
-        currencies.add(new Currency("RUB", "Рубли", 1));
+        currencies.add(new Currency("USD", "Dollars", 1));
+        currencies.add(new Currency("CNY", "Yuan", 1));
+        currencies.add(new Currency("RUB", "Rubles", 1));
     }
 
     @GetMapping

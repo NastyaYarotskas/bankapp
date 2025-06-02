@@ -32,7 +32,7 @@ public class AccountService {
                     if (account.getId() == null) {
                         return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_ACCOUNT_LIST_ERROR_MSG));
                     }
-                    return accountRepository.findById(account.getId())
+                    return accountRepository.findFirstByUserIdAndCurrency(userId, account.getCurrency())
                             .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                     ACCOUNT_WITH_ID_NOT_SOUND_FORMAT_ERROR_MSG.formatted(account.getId()))))
                             .flatMap(existingAccount -> {
