@@ -1,0 +1,33 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: front-ui
+  config:
+    import: optional:consul://localhost:8500
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      config:
+        enabled: true
+        prefixes: config
+        format: PROPERTIES
+        default-context: application
+        watch:
+          enabled: true
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://keycloak:8080/realms/master
+        registration:
+          front-ui-client:
+            provider: keycloak
+            authorizationGrantType: client_credentials
+            client-id: front-ui-client
+            client-secret: LLtTlDhsJJ2lfN5c0oHtcb0zdLQyvkXQ
+            scope: exchange.read,accounts.read,accounts.write,cash.write,transfer.write
+            clientAuthenticationMethod: client_secret_post

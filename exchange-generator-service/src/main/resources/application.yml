@@ -1,0 +1,33 @@
+server:
+  port: 9007
+
+spring:
+  application:
+    name: exchange-generator-service
+  config:
+    import: optional:consul://localhost:8500
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      config:
+        enabled: true
+        prefixes: config
+        format: PROPERTIES
+        default-context: application
+        watch:
+          enabled: true
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://keycloak:8080/realms/master
+        registration:
+          exchange-generator-service-client:
+            provider: keycloak
+            authorizationGrantType: client_credentials
+            client-id: exchange-generator-service-client
+            client-secret: YbvQksjI5zGe3Sy5LBPZsVZFXCdN0WrD
+            scope: exchange.write
+            clientAuthenticationMethod: client_secret_post

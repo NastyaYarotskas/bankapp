@@ -1,0 +1,41 @@
+server:
+  port: 9009
+
+spring:
+  application:
+    name: notification-service
+  config:
+    import: optional:consul://localhost:8500
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      config:
+        enabled: true
+        prefixes: config
+        format: PROPERTIES
+        default-context: application
+        watch:
+          enabled: true
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: http://keycloak:8080/realms/master
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          reactive:
+            result:
+              method:
+                annotation:
+                  RequestMappingHandlerMapping: TRACE
