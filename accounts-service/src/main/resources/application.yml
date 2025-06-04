@@ -33,6 +33,18 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUE_URL:http://keycloak:8080/realms/master}
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://keycloak:8080/realms/master
+        registration:
+          accounts-service-client:
+            provider: keycloak
+            authorizationGrantType: client_credentials
+            client-id: accounts-service-client
+            client-secret: PAsZ470oShhYzY9qlVy35yty0tcWZhp7
+            scope: notification.write
+            clientAuthenticationMethod: client_secret_post
 
 springdoc:
   api-docs:

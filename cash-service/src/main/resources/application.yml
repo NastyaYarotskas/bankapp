@@ -32,5 +32,5 @@ spring:
             authorizationGrantType: client_credentials
             client-id: cash-service-client
             client-secret: 7NH6aciGchDEY7zy4KkJ5jlnGFXVWJmb
-            scope: accounts.read,accounts.write,blocker.read
+            scope: accounts.read,accounts.write,blocker.read,notification.write
             clientAuthenticationMethod: client_secret_post

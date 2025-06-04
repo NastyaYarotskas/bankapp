@@ -17,11 +17,11 @@ spring:
         default-context: application
         watch:
           enabled: true
-#  security:
-#    oauth2:
-#      resourceserver:
-#        jwt:
-#          issuer-uri: http://keycloak:8080/realms/master
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/master
 
 springdoc:
   api-docs:
