@@ -1,12 +1,20 @@
 package ru.yandex.practicum.accounts.service.feature;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
 import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.accounts.service.BaseTest;
 import ru.yandex.practicum.accounts.service.feature.account.Account;
@@ -16,24 +24,43 @@ import ru.yandex.practicum.accounts.service.feature.notification.NotificationReq
 import ru.yandex.practicum.accounts.service.feature.user.*;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER;
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.*;
 
 @AutoConfigureStubRunner(
         ids = "ru.yandex.practicum:notification-service:+:stubs:9001",
         stubsMode = StubRunnerProperties.StubsMode.LOCAL
 )
-@Import(TestConfig.class)
+@Import({TestConfig.class, TestSecurityConfig.class})
 public class UserServiceTest extends BaseTest {
 
+    @MockitoBean
+    private ReactiveOAuth2AuthorizedClientManager manager;
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private UserService userService;
+
+    @BeforeEach
+    void setUp() {
+        OAuth2AccessToken token = new OAuth2AccessToken(
+                BEARER, "mock-token", Instant.now(), Instant.now().plusSeconds(300));
+
+        when(manager.authorize(any()))
+                .thenReturn(Mono.just(new OAuth2AuthorizedClient(
+                        mock(ClientRegistration.class),
+                        "principal",
+                        token)));
+    }
 
     @Test
     void createUser_allParamsAreValid_shouldCreateUser() {
@@ -256,9 +283,6 @@ public class UserServiceTest extends BaseTest {
         String login = "test_user";
         String oldPassword = "old_password";
         String newPassword = "new_password";
-        String expectedNotificationMessage = "Пароль успешно обновлен";
-
-        NotificationRequest expectedRequest = new NotificationRequest(login, expectedNotificationMessage);
 
         UserCreateRequest createRequest = UserCreateRequest.builder()
                 .login(login)

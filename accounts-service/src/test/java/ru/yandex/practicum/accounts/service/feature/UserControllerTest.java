@@ -1,11 +1,15 @@
 package ru.yandex.practicum.accounts.service.feature;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,15 +28,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.CONFIRMATION_ERROR_MSG;
 import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.USER_NOT_FOUND_ERROR_MSG;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@Import(TestSecurityConfig.class)
 public class UserControllerTest extends BaseTest {
 
     @Autowired
@@ -73,7 +78,8 @@ public class UserControllerTest extends BaseTest {
 
         when(userService.createUser(any(UserCreateRequest.class))).thenReturn(Mono.just(expectedUser));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -99,7 +105,8 @@ public class UserControllerTest extends BaseTest {
         when(userService.createUser(any()))
                 .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Логин не может быть пустым")));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -120,7 +127,8 @@ public class UserControllerTest extends BaseTest {
         when(userService.createUser(any()))
                 .thenReturn(Mono.error(new RuntimeException("Внутренняя ошибка сервера")));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -142,7 +150,8 @@ public class UserControllerTest extends BaseTest {
         when(userService.getUserByLogin(login))
                 .thenReturn(Mono.just(expectedUser));
 
-        webTestClient.get()
+        webTestClient.mutateWith(getJwtMutator())
+                .get()
                 .uri("/api/v1/users/{login}", login)
                 .exchange()
                 .expectStatus().isOk()
@@ -161,7 +170,8 @@ public class UserControllerTest extends BaseTest {
                 .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
                         USER_NOT_FOUND_ERROR_MSG.formatted(nonExistentLogin))));
 
-        webTestClient.get()
+        webTestClient.mutateWith(getJwtMutator())
+                .get()
                 .uri("/api/v1/users/{login}", nonExistentLogin)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -187,7 +197,8 @@ public class UserControllerTest extends BaseTest {
 
         when(userService.getAllUsers()).thenReturn(Flux.just(user1, user2));
 
-        webTestClient.get()
+        webTestClient.mutateWith(getJwtMutator())
+                .get()
                 .uri("/api/v1/users")
                 .exchange()
                 .expectStatus().isOk()
@@ -199,7 +210,8 @@ public class UserControllerTest extends BaseTest {
     void getAllUsers_emptyList_shouldReturnEmptyArray() {
         when(userService.getAllUsers()).thenReturn(Flux.empty());
 
-        webTestClient.get()
+        webTestClient.mutateWith(getJwtMutator())
+                .get()
                 .uri("/api/v1/users")
                 .exchange()
                 .expectStatus().isOk()
@@ -229,7 +241,8 @@ public class UserControllerTest extends BaseTest {
         when(userService.updateUserPassword(login, request))
                 .thenReturn(Mono.just(expectedUser));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users/{login}/editPassword", login)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -254,7 +267,8 @@ public class UserControllerTest extends BaseTest {
                 .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
                         USER_NOT_FOUND_ERROR_MSG.formatted(nonExistentLogin))));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users/{login}/editPassword", nonExistentLogin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -273,7 +287,8 @@ public class UserControllerTest extends BaseTest {
         when(userService.updateUserPassword(login, request))
                 .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, CONFIRMATION_ERROR_MSG)));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users/{login}/editPassword", login)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -292,7 +307,8 @@ public class UserControllerTest extends BaseTest {
         when(userService.updateUserPassword(login, request))
                 .thenReturn(Mono.error(new RuntimeException("Внутренняя ошибка сервера")));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users/{login}/editPassword", login)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -320,7 +336,8 @@ public class UserControllerTest extends BaseTest {
         when(userService.updateUserAccounts(eq(login), any(User.class)))
                 .thenReturn(Mono.just(user));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users/{login}/editUserAccounts", login)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(user)
@@ -348,7 +365,8 @@ public class UserControllerTest extends BaseTest {
                         USER_NOT_FOUND_ERROR_MSG.formatted(nonExistentLogin))
                 ));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users/{login}/editUserAccounts", nonExistentLogin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(user)
@@ -367,11 +385,17 @@ public class UserControllerTest extends BaseTest {
                         "Некорректные данные пользователя"
                 )));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users/{login}/editUserAccounts", login)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidUser)
                 .exchange()
                 .expectStatus().isBadRequest();
+    }
+
+    private static SecurityMockServerConfigurers.JwtMutator getJwtMutator() {
+        return mockJwt().authorities(new SimpleGrantedAuthority("SCOPE_accounts.write"),
+                new SimpleGrantedAuthority("SCOPE_accounts.read"));
     }
 }

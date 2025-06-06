@@ -1,8 +1,15 @@
 package ru.yandex.practicum.transfer.service.feature.transfer;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
@@ -12,13 +19,20 @@ import ru.yandex.practicum.transfer.service.feature.transfer.model.Account;
 import ru.yandex.practicum.transfer.service.feature.transfer.model.Currency;
 import ru.yandex.practicum.transfer.service.feature.transfer.model.User;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER;
 
 @SpringBootTest
+@Import({TestSecurityConfig.class})
 public class TransferServiceTest {
+
+    @MockitoBean
+    private ReactiveOAuth2AuthorizedClientManager manager;
 
     @MockitoBean
     private AccountsServiceClient accountsServiceClient;
@@ -34,6 +48,20 @@ public class TransferServiceTest {
 
     @Autowired
     private TransferService transferService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        OAuth2AccessToken token = new OAuth2AccessToken(
+                BEARER, "mock-token", Instant.now(), Instant.now().plusSeconds(300));
+
+        when(manager.authorize(any()))
+                .thenReturn(Mono.just(new OAuth2AuthorizedClient(
+                        mock(ClientRegistration.class),
+                        "principal",
+                        token)));
+    }
 
     @Test
     void transfer_validRequest_shouldTransferSuccessfully() {
@@ -85,6 +113,7 @@ public class TransferServiceTest {
 
         when(accountsServiceClient.getAccountDetails("user1")).thenReturn(Mono.just(fromUser));
         when(accountsServiceClient.getAccountDetails("user2")).thenReturn(Mono.just(toUser));
+        when(notificationServiceClient.sendNotification(any())).thenReturn(Mono.empty());
 
         StepVerifier.create(transferService.transfer(request))
                 .expectError(ResponseStatusException.class)
@@ -124,5 +153,4 @@ public class TransferServiceTest {
         user.setAccounts(List.of(account));
         return user;
     }
-
 }

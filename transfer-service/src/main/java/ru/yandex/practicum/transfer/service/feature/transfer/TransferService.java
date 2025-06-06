@@ -78,7 +78,12 @@ public class TransferService {
     }
 
     private void sendTransferNotification(String login, String message, boolean isSuccess) {
-        notificationServiceClient.sendNotification(new NotificationRequest(login, message));
+        notificationServiceClient.sendNotification(new NotificationRequest(login, message))
+                .subscribe(
+                        null,
+                        e -> log.error("Failed to send success notification", e)
+                );
+        ;
     }
 
     private Mono<Double> getConvertedAmount(TransferRequest request) {

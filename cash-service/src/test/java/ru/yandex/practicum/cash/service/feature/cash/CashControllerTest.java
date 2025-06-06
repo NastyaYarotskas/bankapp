@@ -4,7 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -12,9 +15,11 @@ import reactor.core.publisher.Mono;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@Import(TestSecurityConfig.class)
 public class CashControllerTest {
 
     @Autowired
@@ -34,7 +39,8 @@ public class CashControllerTest {
         when(cashService.processAccountTransaction(eq(login), any(CashChangeRequest.class)))
                 .thenReturn(Mono.empty());
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users/{login}/cash", login)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -46,7 +52,8 @@ public class CashControllerTest {
     void processAccountTransaction_emptyRequest_shouldReturnBadRequest() {
         String login = "testUser";
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users/{login}/cash", login)
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -65,11 +72,16 @@ public class CashControllerTest {
         when(cashService.processAccountTransaction(eq(login), any(CashChangeRequest.class)))
                 .thenReturn(Mono.empty());
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/v1/users/{login}/cash", login)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
                 .expectStatus().isOk();
+    }
+
+    private static SecurityMockServerConfigurers.JwtMutator getJwtMutator() {
+        return mockJwt().authorities(new SimpleGrantedAuthority("SCOPE_cash.write"));
     }
 }

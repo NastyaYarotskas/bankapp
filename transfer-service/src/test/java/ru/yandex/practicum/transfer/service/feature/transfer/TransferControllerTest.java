@@ -4,7 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -12,9 +15,11 @@ import reactor.core.publisher.Mono;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@Import(TestSecurityConfig.class)
 public class TransferControllerTest {
 
     @Autowired
@@ -34,7 +39,8 @@ public class TransferControllerTest {
         when(transferService.transfer(any(TransferRequest.class)))
                 .thenReturn(Mono.empty());
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/users/user1/transfer")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -42,5 +48,9 @@ public class TransferControllerTest {
                 .expectStatus().isOk();
 
         verify(transferService).transfer(any(TransferRequest.class));
+    }
+
+    private static SecurityMockServerConfigurers.JwtMutator getJwtMutator() {
+        return mockJwt().authorities(new SimpleGrantedAuthority("SCOPE_transfer.write"));
     }
 }

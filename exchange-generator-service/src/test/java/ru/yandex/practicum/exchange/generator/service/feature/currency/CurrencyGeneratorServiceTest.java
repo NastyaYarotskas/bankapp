@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
         ids = "ru.yandex.practicum:exchange-service:+:stubs:9001",
         stubsMode = StubRunnerProperties.StubsMode.LOCAL
 )
-@Import(TestConfig.class)
+@Import({TestConfig.class, TestSecurityConfig.class})
 public class CurrencyGeneratorServiceTest {
 
     @Autowired

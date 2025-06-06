@@ -1,0 +1,65 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: accounts-service
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5430/accounts_service_db
+    username: sa
+    password: sa
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 10
+  sql:
+    init:
+      mode: always
+  config:
+    import: optional:consul://localhost:8500
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      config:
+        enabled: true
+        prefixes: config
+        format: PROPERTIES
+        default-context: application
+        watch:
+          enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUE_URL:http://keycloak:8080/realms/master}
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://keycloak:8080/realms/master
+        registration:
+          accounts-service-client:
+            provider: keycloak
+            authorizationGrantType: client_credentials
+            client-id: accounts-service-client
+            client-secret: PAsZ470oShhYzY9qlVy35yty0tcWZhp7
+            scope: notification.write
+            clientAuthenticationMethod: client_secret_post
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    org:
+      springframework:
+        r2dbc: DEBUG
+        web:
+          reactive:
+            result:
+              method:
+                annotation:
+                  RequestMappingHandlerMapping: TRACE
