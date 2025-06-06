@@ -5,12 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -29,7 +32,8 @@ public class BlockerOperationControllerTest {
         when(blockerOperationService.checkOperation(any()))
                 .thenReturn(Mono.just(expectedResult));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/operations")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -51,7 +55,8 @@ public class BlockerOperationControllerTest {
         when(blockerOperationService.checkOperation(any()))
                 .thenReturn(Mono.just(blockedResult));
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/operations")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -65,7 +70,8 @@ public class BlockerOperationControllerTest {
     void performOperation_invalidRequest_shouldReturnBadRequest() {
         String invalidJson = "{\"userId\": \"user123\", invalid}";
 
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/operations")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidJson)
@@ -75,10 +81,15 @@ public class BlockerOperationControllerTest {
 
     @Test
     void performOperation_emptyRequest_shouldReturnBadRequest() {
-        webTestClient.post()
+        webTestClient.mutateWith(getJwtMutator())
+                .post()
                 .uri("/api/operations")
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isBadRequest();
+    }
+
+    private static SecurityMockServerConfigurers.JwtMutator getJwtMutator() {
+        return mockJwt().authorities(new SimpleGrantedAuthority("SCOPE_blocker.read"));
     }
 }

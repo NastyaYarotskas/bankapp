@@ -8,11 +8,24 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
 import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.accounts.service.BaseTest;
 import ru.yandex.practicum.accounts.service.feature.user.UserCreateRequest;
 import ru.yandex.practicum.accounts.service.feature.user.UserService;
+
+import java.time.Instant;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -20,11 +33,13 @@ import ru.yandex.practicum.accounts.service.feature.user.UserService;
         ids = "ru.yandex.practicum:notification-service:+:stubs:9001",
         stubsMode = StubRunnerProperties.StubsMode.LOCAL
 )
-@Import(TestConfig.class)
+@Import({TestConfig.class, TestSecurityConfig.class, OAuth2ClientTestConfig.class})
 public class UserContractTest extends BaseTest {
 
     @Autowired
     WebTestClient webTestClient;
+    @MockitoBean
+    private ReactiveOAuth2AuthorizedClientManager manager;
     @Autowired
     private UserService userService;
 
@@ -74,5 +89,14 @@ public class UserContractTest extends BaseTest {
                         .thenMany(userService.getAllUsers()))
                 .expectNextCount(4)
                 .verifyComplete();
+
+        OAuth2AccessToken token = new OAuth2AccessToken(
+                BEARER, "mock-token", Instant.now(), Instant.now().plusSeconds(300));
+
+        when(manager.authorize(any()))
+                .thenReturn(Mono.just(new OAuth2AuthorizedClient(
+                        mock(ClientRegistration.class),
+                        "principal",
+                        token)));
     }
 }

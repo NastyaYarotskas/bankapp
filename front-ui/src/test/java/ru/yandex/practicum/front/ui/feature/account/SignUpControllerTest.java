@@ -6,12 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.front.ui.feature.TestSecurityConfig;
 import ru.yandex.practicum.front.ui.feature.account.model.User;
 import ru.yandex.practicum.front.ui.feature.account.request.CreateUserRequest;
 import ru.yandex.practicum.front.ui.feature.error.ErrorResponse;
@@ -24,6 +26,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@Import(TestSecurityConfig.class)
 public class SignUpControllerTest {
 
     @Autowired

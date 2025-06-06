@@ -4,11 +4,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@Import(TestSecurityConfig.class)
 public class CurrencyControllerTest {
 
     @Autowired
@@ -16,7 +22,8 @@ public class CurrencyControllerTest {
 
     @Test
     void getAllCurrencies_currenciesArePresent_shouldReturnAllCurrencies() {
-        webTestClient.get()
+        webTestClient.mutateWith(getJwtMutator())
+                .get()
                 .uri("/api/currencies")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -33,7 +40,8 @@ public class CurrencyControllerTest {
 
     @Test
     void getCurrency_whenCurrencyExists_shouldReturnCurrency() {
-        webTestClient.get()
+        webTestClient.mutateWith(getJwtMutator())
+                .get()
                 .uri("/api/currencies/usd")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -45,7 +53,8 @@ public class CurrencyControllerTest {
 
     @Test
     void getCurrency_whenCurrencyExistsIgnoreCase_shouldReturnCurrency() {
-        webTestClient.get()
+        webTestClient.mutateWith(getJwtMutator())
+                .get()
                 .uri("/api/currencies/USD")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -57,7 +66,8 @@ public class CurrencyControllerTest {
 
     @Test
     void getCurrency_whenCurrencyNotExists_shouldReturnBadRequest() {
-        webTestClient.get()
+        webTestClient.mutateWith(getJwtMutator())
+                .get()
                 .uri("/api/currencies/EURO")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -68,7 +78,8 @@ public class CurrencyControllerTest {
     void updateCurrency_whenCurrencyExists_shouldUpdateAndReturnCurrency() {
         Currency updatedCurrency = new Currency("USD", "Dollars", 1.5);
 
-        webTestClient.put()
+        webTestClient.mutateWith(getJwtMutator())
+                .put()
                 .uri("/api/currencies/usd")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updatedCurrency)
@@ -79,7 +90,8 @@ public class CurrencyControllerTest {
 
         updatedCurrency = new Currency("USD", "Dollars", 1);
 
-        webTestClient.put()
+        webTestClient.mutateWith(getJwtMutator())
+                .put()
                 .uri("/api/currencies/usd")
                 .bodyValue(updatedCurrency)
                 .exchange()
@@ -92,11 +104,17 @@ public class CurrencyControllerTest {
     void updateCurrency_whenCurrencyNotExists_shouldReturnBadRequest() {
         Currency updatedCurrency = new Currency("EURO", "Euro", 0.85);
 
-        webTestClient.put()
+        webTestClient.mutateWith(getJwtMutator())
+                .put()
                 .uri("/api/currencies/EURO")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updatedCurrency)
                 .exchange()
                 .expectStatus().isBadRequest();
+    }
+
+    private static SecurityMockServerConfigurers.JwtMutator getJwtMutator() {
+        return mockJwt().authorities(new SimpleGrantedAuthority("SCOPE_exchange.write"),
+                new SimpleGrantedAuthority("SCOPE_exchange.read"));
     }
 }

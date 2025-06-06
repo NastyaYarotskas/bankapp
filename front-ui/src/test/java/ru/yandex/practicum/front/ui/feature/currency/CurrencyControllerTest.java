@@ -1,20 +1,16 @@
 package ru.yandex.practicum.front.ui.feature.currency;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import ru.yandex.practicum.front.ui.feature.TestSecurityConfig;
 import ru.yandex.practicum.front.ui.feature.account.model.Currency;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@Import(TestSecurityConfig.class)
 class CurrencyControllerTest {
 
     @Autowired
