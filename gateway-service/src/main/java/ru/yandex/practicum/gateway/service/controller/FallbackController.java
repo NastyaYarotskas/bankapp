@@ -1,4 +1,4 @@
-package ru.yandex.practicum.gateway.service;
+package ru.yandex.practicum.gateway.service.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
