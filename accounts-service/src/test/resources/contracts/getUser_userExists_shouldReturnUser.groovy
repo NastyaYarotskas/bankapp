@@ -25,7 +25,7 @@ Contract.make {
                                         title: "Dollars",
                                         name: "USD"
                                 ],
-                                value: 0,
+                                value: 1000,
                                 exists: true
                         ],
                         [
@@ -34,7 +34,7 @@ Contract.make {
                                         title: "Rubles",
                                         name: "RUB"
                                 ],
-                                value: 0,
+                                value: 1000,
                                 exists: true
                         ],
                         [
@@ -43,7 +43,7 @@ Contract.make {
                                         title: "Yuan",
                                         name: "CNY"
                                 ],
-                                value: 0,
+                                value: 1000,
                                 exists: true
                         ]
                 ]

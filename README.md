@@ -19,3 +19,4 @@ TODO:
 * get rid of currency enum in accounts-service
 * add db for exchange service?
 * currencies from one source
+* move duplicate conf to parent?

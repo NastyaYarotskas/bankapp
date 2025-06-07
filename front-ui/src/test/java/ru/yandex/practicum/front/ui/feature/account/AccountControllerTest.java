@@ -9,10 +9,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.ui.Model;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,7 +23,6 @@ import ru.yandex.practicum.front.ui.feature.account.model.User;
 import ru.yandex.practicum.front.ui.feature.account.request.EditPasswordRequest;
 import ru.yandex.practicum.front.ui.feature.account.request.UserUpdateRequest;
 import ru.yandex.practicum.front.ui.feature.auth.CustomUserDetails;
-import org.springframework.ui.Model;
 import ru.yandex.practicum.front.ui.feature.error.ErrorResponse;
 
 import java.time.OffsetDateTime;
@@ -32,7 +31,6 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
 @SpringBootTest
 @AutoConfigureWebTestClient

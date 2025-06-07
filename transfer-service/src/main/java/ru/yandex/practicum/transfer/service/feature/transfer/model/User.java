@@ -18,6 +18,6 @@ public class User {
     private String login;
     private String name;
     private String password;
-    private OffsetDateTime birthdate;
+    private String birthdate;
     private List<Account> accounts;
 }

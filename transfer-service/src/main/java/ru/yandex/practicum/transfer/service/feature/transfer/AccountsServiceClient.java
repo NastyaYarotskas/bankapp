@@ -1,6 +1,7 @@
 package ru.yandex.practicum.transfer.service.feature.transfer;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
@@ -15,13 +16,11 @@ import ru.yandex.practicum.transfer.service.feature.transfer.model.User;
 @Component
 public class AccountsServiceClient {
 
-    private final WebClient accountsServiceWebClient;
+    @Autowired
+    @Qualifier("accountsServiceWebClient")
+    private WebClient accountsServiceWebClient;
     @Autowired
     private ReactiveOAuth2AuthorizedClientManager manager;
-
-    public AccountsServiceClient(@LoadBalanced WebClient.Builder accountsServiceWebClientBuilder) {
-        this.accountsServiceWebClient = accountsServiceWebClientBuilder.build();
-    }
 
     public Mono<User> getAccountDetails(String login) {
         return retrieveToken()

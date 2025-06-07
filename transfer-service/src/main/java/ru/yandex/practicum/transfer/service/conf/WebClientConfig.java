@@ -17,10 +17,8 @@ public class WebClientConfig {
     }
 
     @Bean
-    @LoadBalanced
-    public WebClient.Builder exchangeServiceWebClientBuilder(@Value("${exchange.service.url}") String baseUrl) {
-        return WebClient.builder()
-                .baseUrl(baseUrl);
+    public WebClient accountsServiceWebClient(WebClient.Builder accountsServiceWebClientBuilder) {
+        return accountsServiceWebClientBuilder.build();
     }
 
     @Bean
@@ -31,9 +29,31 @@ public class WebClientConfig {
     }
 
     @Bean
+    public WebClient blockerServiceWebClient(WebClient.Builder blockerServiceWebClientBuilder) {
+        return blockerServiceWebClientBuilder.build();
+    }
+
+    @Bean
     @LoadBalanced
     public WebClient.Builder notificationServiceWebClientBuilder(@Value("${notification.service.url}") String baseUrl) {
         return WebClient.builder()
                 .baseUrl(baseUrl);
+    }
+
+    @Bean
+    public WebClient notificationServiceWebClient(WebClient.Builder notificationServiceWebClientBuilder) {
+        return notificationServiceWebClientBuilder.build();
+    }
+
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder exchangeServiceWebClientBuilder(@Value("${exchange.service.url}") String baseUrl) {
+        return WebClient.builder()
+                .baseUrl(baseUrl);
+    }
+
+    @Bean
+    public WebClient exchangeServiceWebClient(WebClient.Builder exchangeServiceWebClientBuilder) {
+        return exchangeServiceWebClientBuilder.build();
     }
 }

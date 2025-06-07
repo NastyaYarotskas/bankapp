@@ -1,6 +1,7 @@
 package ru.yandex.practicum.transfer.service.feature.transfer;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
@@ -16,13 +17,11 @@ import ru.yandex.practicum.transfer.service.feature.transfer.model.Currency;
 @Component
 public class ExchangeServiceClient {
 
-    private final WebClient exchangeServiceWebClient;
+    @Autowired
+    @Qualifier("exchangeServiceWebClient")
+    private WebClient exchangeServiceWebClient;
     @Autowired
     private ReactiveOAuth2AuthorizedClientManager manager;
-
-    public ExchangeServiceClient(@LoadBalanced WebClient.Builder exchangeServiceWebClientBuilder) {
-        this.exchangeServiceWebClient = exchangeServiceWebClientBuilder.build();
-    }
 
     public Flux<Currency> getCurrencyRates() {
         return retrieveToken()
