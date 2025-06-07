@@ -1,4 +1,4 @@
-package ru.yandex.practicum.transfer.service.feature.transfer.model;
+package ru.yandex.practicum.transfer.service.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

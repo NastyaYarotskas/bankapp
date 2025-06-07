@@ -1,4 +1,4 @@
-package ru.yandex.practicum.transfer.service.feature.transfer;
+package ru.yandex.practicum.transfer.service.feature.transfer.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +11,9 @@ import org.springframework.security.test.web.reactive.server.SecurityMockServerC
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.transfer.service.feature.transfer.config.TestOAuth2ClientConfig;
+import ru.yandex.practicum.transfer.service.request.TransferRequest;
+import ru.yandex.practicum.transfer.service.service.TransferService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -19,7 +22,7 @@ import static org.springframework.security.test.web.reactive.server.SecurityMock
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-@Import(TestSecurityConfig.class)
+@Import(TestOAuth2ClientConfig.class)
 public class TransferControllerTest {
 
     @Autowired

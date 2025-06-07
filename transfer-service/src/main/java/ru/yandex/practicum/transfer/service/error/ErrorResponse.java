@@ -1,4 +1,4 @@
-package ru.yandex.practicum.transfer.service.feature.error;
+package ru.yandex.practicum.transfer.service.error;
 
 import java.time.Instant;
 

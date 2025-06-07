@@ -1,4 +1,4 @@
-package ru.yandex.practicum.transfer.service.feature.transfer;
+package ru.yandex.practicum.transfer.service.request;
 
 import lombok.Data;
 
