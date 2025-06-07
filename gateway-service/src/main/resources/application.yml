@@ -29,30 +29,134 @@ spring:
             - Path=/exchange-service/**
           filters:
             - RewritePath=/exchange-service/?(?<segment>.*), /$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: exchangeServiceCircuitBreaker
+                fallbackUri: forward:/exchange-service-fallback
+            - name: Retry
+              args:
+                retries: 3
+                methods: GET,POST,PUT,PATCH,DELETE
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+
         - id: accounts-service-route
           uri: lb://accounts-service
           predicates:
             - Path=/accounts-service/**
           filters:
             - RewritePath=/accounts-service/?(?<segment>.*), /$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: accountsServiceCircuitBreaker
+                fallbackUri: forward:/accounts-service-fallback
+            - name: Retry
+              args:
+                retries: 3
+                methods: GET,POST,PUT,PATCH,DELETE
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+
         - id: cash-service-route
           uri: lb://cash-service
           predicates:
             - Path=/cash-service/**
           filters:
             - RewritePath=/cash-service/?(?<segment>.*), /$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: cashServiceCircuitBreaker
+                fallbackUri: forward:/cash-service-fallback
+            - name: Retry
+              args:
+                retries: 3
+                methods: GET,POST,PUT,PATCH,DELETE
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+
         - id: transfer-service-route
           uri: lb://transfer-service
           predicates:
             - Path=/transfer-service/**
           filters:
             - RewritePath=/transfer-service/?(?<segment>.*), /$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: transferServiceCircuitBreaker
+                fallbackUri: forward:/transfer-service-fallback
+            - name: Retry
+              args:
+                retries: 3
+                methods: GET,POST,PUT,PATCH,DELETE
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+
         - id: blocker-service-route
           uri: lb://blocker-service
           predicates:
             - Path=/blocker-service/**
           filters:
             - RewritePath=/blocker-service/?(?<segment>.*), /$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: blockerServiceCircuitBreaker
+                fallbackUri: forward:/blocker-service-fallback
+            - name: Retry
+              args:
+                retries: 3
+                methods: GET,POST,PUT,PATCH,DELETE
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+
+# Добавим конфигурацию Resilience4j
+resilience4j:
+  circuitbreaker:
+    instances:
+      exchangeServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5000
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      accountsServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5000
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      cashServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5000
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      transferServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5000
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      blockerServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5000
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
 
 logging:
   level:
