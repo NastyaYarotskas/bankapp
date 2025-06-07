@@ -14,7 +14,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class OAuth2ClientConfig {
 
     @Bean
-    SecurityWebFilterChain securityFilterChain(ServerHttpSecurity security) {
+    public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity security) {
         return security
                 .authorizeExchange(requests -> requests
                         .pathMatchers(

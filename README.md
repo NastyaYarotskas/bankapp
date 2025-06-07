@@ -30,10 +30,3 @@ mvnw.cmd clean install    # Windows
         ./start.sh
     ```
 3. Перейти по ссылке `http://localhost:9000/`
-
-TODO:
-* encrypt password in accounts-service
-* get rid of currency enum in accounts-service
-* add db for exchange service?
-* currencies from one source
-* move duplicate conf to parent?

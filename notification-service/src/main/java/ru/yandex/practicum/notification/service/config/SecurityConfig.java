@@ -15,11 +15,11 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/api/notifications").hasAuthority("SCOPE_notification.write") //Require scope
-                                .anyRequest().permitAll() // All other requests need authentication
+                                .requestMatchers("/api/notifications").hasAuthority("SCOPE_notification.write")
+                                .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwt -> {}) // Enable JWT-based authentication for the resource server
+                        oauth2.jwt(jwt -> {})
                 );
         return http.build();
     }

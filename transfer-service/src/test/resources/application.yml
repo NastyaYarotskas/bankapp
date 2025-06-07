@@ -1,0 +1,24 @@
+spring:
+  cloud:
+    consul:
+      enabled: false
+      config:
+        enabled: false
+      discovery:
+        enabled: false
+
+account:
+  service:
+    url: http://localhost:9003
+
+blocker:
+  service:
+    url: http://localhost:9002
+
+notification:
+  service:
+    url: http://localhost:9001
+
+exchange:
+  service:
+    url: http://localhost:9004
