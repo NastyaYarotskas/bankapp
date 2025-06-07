@@ -32,7 +32,7 @@ services:
     container_name: consul-config-loader
     volumes:
       - ./.docker:/docker
-    command: [ "/bin/sh", "/docker/upload-to-consul.sh" ]
+    command: [ "/bin/sh", "/docker/consul/upload-to-consul.sh" ]
     depends_on:
       consul-server:
         condition: service_healthy
