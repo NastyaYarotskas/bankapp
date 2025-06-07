@@ -1,11 +1,15 @@
-package ru.yandex.practicum.blocker.service.feature;
+package ru.yandex.practicum.blocker.service.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import ru.yandex.practicum.blocker.service.config.TestOAuth2ClientConfig;
+import ru.yandex.practicum.blocker.service.model.OperationCheckResult;
+import ru.yandex.practicum.blocker.service.model.OperationContext;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -15,6 +19,7 @@ import java.util.Map;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@Import(TestOAuth2ClientConfig.class)
 public class BlockerOperationServiceTest {
 
     @Mock

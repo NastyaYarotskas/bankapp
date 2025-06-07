@@ -1,4 +1,4 @@
-package ru.yandex.practicum.blocker.service.feature;
+package ru.yandex.practicum.blocker.service.model;
 
 public record OperationCheckResult(boolean blocked, String message, String detectionAlgorithm) {
     public static OperationCheckResult ok() {

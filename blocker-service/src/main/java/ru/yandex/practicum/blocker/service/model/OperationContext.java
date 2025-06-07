@@ -1,4 +1,4 @@
-package ru.yandex.practicum.blocker.service.feature;
+package ru.yandex.practicum.blocker.service.model;
 
 import lombok.Builder;
 import lombok.Data;

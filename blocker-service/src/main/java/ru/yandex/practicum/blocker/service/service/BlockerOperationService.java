@@ -1,9 +1,11 @@
-package ru.yandex.practicum.blocker.service.feature;
+package ru.yandex.practicum.blocker.service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.blocker.service.model.OperationCheckResult;
+import ru.yandex.practicum.blocker.service.model.OperationContext;
 
 import java.util.List;
 

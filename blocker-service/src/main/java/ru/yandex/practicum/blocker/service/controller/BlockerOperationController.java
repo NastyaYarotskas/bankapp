@@ -1,10 +1,14 @@
-package ru.yandex.practicum.blocker.service.feature;
+package ru.yandex.practicum.blocker.service.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.blocker.service.service.BlockerOperationService;
+import ru.yandex.practicum.blocker.service.model.OperationCheckResult;
+import ru.yandex.practicum.blocker.service.model.OperationContext;
+import ru.yandex.practicum.blocker.service.model.OperationRequest;
 
 import java.time.OffsetDateTime;
 
