@@ -1,17 +1,17 @@
-package ru.yandex.practicum.accounts.service.feature.user;
+package ru.yandex.practicum.accounts.service.service;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.accounts.service.model.User;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 
-import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.*;
+import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.*;
 
 @UtilityClass
 public class UserValidator {

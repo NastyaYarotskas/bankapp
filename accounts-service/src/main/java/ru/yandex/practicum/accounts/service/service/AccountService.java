@@ -1,4 +1,4 @@
-package ru.yandex.practicum.accounts.service.feature.account;
+package ru.yandex.practicum.accounts.service.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -6,11 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.accounts.service.entity.AccountEntity;
+import ru.yandex.practicum.accounts.service.repository.AccountRepository;
 
 import java.util.UUID;
 
-import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.ACCOUNT_WITH_ID_NOT_SOUND_FORMAT_ERROR_MSG;
-import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.INVALID_ACCOUNT_LIST_ERROR_MSG;
+import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.ACCOUNT_WITH_ID_NOT_SOUND_FORMAT_ERROR_MSG;
+import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.INVALID_ACCOUNT_LIST_ERROR_MSG;
 
 @Service
 public class AccountService {

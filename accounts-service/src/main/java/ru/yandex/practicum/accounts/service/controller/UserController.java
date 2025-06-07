@@ -1,4 +1,4 @@
-package ru.yandex.practicum.accounts.service.feature.user;
+package ru.yandex.practicum.accounts.service.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,6 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.accounts.service.request.EditPasswordRequest;
+import ru.yandex.practicum.accounts.service.request.UserCreateRequest;
+import ru.yandex.practicum.accounts.service.entity.UserEntity;
+import ru.yandex.practicum.accounts.service.service.UserService;
+import ru.yandex.practicum.accounts.service.model.User;
 
 @Slf4j
 @RestController

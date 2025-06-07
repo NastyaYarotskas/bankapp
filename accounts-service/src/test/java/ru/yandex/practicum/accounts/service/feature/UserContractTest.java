@@ -17,8 +17,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.accounts.service.BaseTest;
-import ru.yandex.practicum.accounts.service.feature.user.UserCreateRequest;
-import ru.yandex.practicum.accounts.service.feature.user.UserService;
+import ru.yandex.practicum.accounts.service.request.UserCreateRequest;
+import ru.yandex.practicum.accounts.service.service.UserService;
 
 import java.time.Instant;
 

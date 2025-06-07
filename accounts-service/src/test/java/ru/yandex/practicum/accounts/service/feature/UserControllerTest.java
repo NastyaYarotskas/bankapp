@@ -1,6 +1,5 @@
 package ru.yandex.practicum.accounts.service.feature;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -16,10 +15,14 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.accounts.service.BaseTest;
-import ru.yandex.practicum.accounts.service.feature.account.Account;
-import ru.yandex.practicum.accounts.service.feature.currency.Currency;
-import ru.yandex.practicum.accounts.service.feature.currency.CurrencyEnum;
-import ru.yandex.practicum.accounts.service.feature.user.*;
+import ru.yandex.practicum.accounts.service.entity.UserEntity;
+import ru.yandex.practicum.accounts.service.model.Account;
+import ru.yandex.practicum.accounts.service.model.Currency;
+import ru.yandex.practicum.accounts.service.model.CurrencyEnum;
+import ru.yandex.practicum.accounts.service.model.User;
+import ru.yandex.practicum.accounts.service.request.EditPasswordRequest;
+import ru.yandex.practicum.accounts.service.request.UserCreateRequest;
+import ru.yandex.practicum.accounts.service.service.UserService;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -32,8 +35,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
-import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.CONFIRMATION_ERROR_MSG;
-import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.USER_NOT_FOUND_ERROR_MSG;
+import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.CONFIRMATION_ERROR_MSG;
+import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.USER_NOT_FOUND_ERROR_MSG;
 
 @SpringBootTest
 @AutoConfigureWebTestClient

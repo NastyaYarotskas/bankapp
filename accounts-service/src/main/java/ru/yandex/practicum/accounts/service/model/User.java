@@ -1,11 +1,9 @@
-package ru.yandex.practicum.accounts.service.feature.user;
+package ru.yandex.practicum.accounts.service.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.accounts.service.feature.account.Account;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;

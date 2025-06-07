@@ -1,10 +1,12 @@
-package ru.yandex.practicum.accounts.service.feature.user;
+package ru.yandex.practicum.accounts.service.service;
 
 import lombok.experimental.UtilityClass;
-import ru.yandex.practicum.accounts.service.feature.account.Account;
-import ru.yandex.practicum.accounts.service.feature.account.AccountEntity;
-import ru.yandex.practicum.accounts.service.feature.currency.Currency;
-import ru.yandex.practicum.accounts.service.feature.currency.CurrencyEnum;
+import ru.yandex.practicum.accounts.service.entity.UserEntity;
+import ru.yandex.practicum.accounts.service.model.Account;
+import ru.yandex.practicum.accounts.service.entity.AccountEntity;
+import ru.yandex.practicum.accounts.service.model.Currency;
+import ru.yandex.practicum.accounts.service.model.CurrencyEnum;
+import ru.yandex.practicum.accounts.service.model.User;
 
 import java.util.List;
 

@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
 import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.context.annotation.Import;
@@ -17,11 +16,15 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.yandex.practicum.accounts.service.BaseTest;
-import ru.yandex.practicum.accounts.service.feature.account.Account;
-import ru.yandex.practicum.accounts.service.feature.currency.Currency;
-import ru.yandex.practicum.accounts.service.feature.currency.CurrencyEnum;
-import ru.yandex.practicum.accounts.service.feature.notification.NotificationRequest;
-import ru.yandex.practicum.accounts.service.feature.user.*;
+import ru.yandex.practicum.accounts.service.model.Account;
+import ru.yandex.practicum.accounts.service.model.Currency;
+import ru.yandex.practicum.accounts.service.model.CurrencyEnum;
+import ru.yandex.practicum.accounts.service.model.User;
+import ru.yandex.practicum.accounts.service.notification.NotificationRequest;
+import ru.yandex.practicum.accounts.service.repository.UserRepository;
+import ru.yandex.practicum.accounts.service.request.EditPasswordRequest;
+import ru.yandex.practicum.accounts.service.request.UserCreateRequest;
+import ru.yandex.practicum.accounts.service.service.UserService;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -34,7 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER;
-import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.*;
+import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.*;
 
 @AutoConfigureStubRunner(
         ids = "ru.yandex.practicum:notification-service:+:stubs:9001",

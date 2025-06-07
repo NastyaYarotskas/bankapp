@@ -1,4 +1,4 @@
-package ru.yandex.practicum.accounts.service.feature.user;
+package ru.yandex.practicum.accounts.service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,12 +10,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
-import ru.yandex.practicum.accounts.service.feature.account.Account;
-import ru.yandex.practicum.accounts.service.feature.account.AccountEntity;
-import ru.yandex.practicum.accounts.service.feature.account.AccountService;
-import ru.yandex.practicum.accounts.service.feature.currency.CurrencyEnum;
-import ru.yandex.practicum.accounts.service.feature.notification.NotificationRequest;
-import ru.yandex.practicum.accounts.service.feature.notification.NotificationServiceClient;
+import ru.yandex.practicum.accounts.service.entity.UserEntity;
+import ru.yandex.practicum.accounts.service.model.Account;
+import ru.yandex.practicum.accounts.service.entity.AccountEntity;
+import ru.yandex.practicum.accounts.service.model.User;
+import ru.yandex.practicum.accounts.service.repository.UserRepository;
+import ru.yandex.practicum.accounts.service.request.EditPasswordRequest;
+import ru.yandex.practicum.accounts.service.request.UserCreateRequest;
+import ru.yandex.practicum.accounts.service.model.CurrencyEnum;
+import ru.yandex.practicum.accounts.service.notification.NotificationRequest;
+import ru.yandex.practicum.accounts.service.notification.NotificationServiceClient;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -25,9 +29,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static ru.yandex.practicum.accounts.service.feature.notification.NotificationMessages.*;
-import static ru.yandex.practicum.accounts.service.feature.user.UserValidationErrorMessages.*;
-import static ru.yandex.practicum.accounts.service.feature.user.UserValidator.*;
+import static ru.yandex.practicum.accounts.service.notification.NotificationMessages.*;
+import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.*;
+import static ru.yandex.practicum.accounts.service.service.UserValidator.*;
 
 @Slf4j
 @Service

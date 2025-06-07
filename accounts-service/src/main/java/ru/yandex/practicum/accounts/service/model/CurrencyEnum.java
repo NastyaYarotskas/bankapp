@@ -1,4 +1,4 @@
-package ru.yandex.practicum.accounts.service.feature.currency;
+package ru.yandex.practicum.accounts.service.model;
 
 import lombok.Getter;
 

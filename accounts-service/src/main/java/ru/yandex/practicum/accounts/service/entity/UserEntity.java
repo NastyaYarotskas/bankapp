@@ -1,4 +1,4 @@
-package ru.yandex.practicum.accounts.service.feature.user;
+package ru.yandex.practicum.accounts.service.entity;
 
 import lombok.Builder;
 import lombok.Data;

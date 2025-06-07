@@ -1,4 +1,4 @@
-package ru.yandex.practicum.accounts.service.feature.notification;
+package ru.yandex.practicum.accounts.service.notification;
 
 import lombok.experimental.UtilityClass;
 

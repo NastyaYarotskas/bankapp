@@ -1,9 +1,10 @@
-package ru.yandex.practicum.accounts.service.feature.account;
+package ru.yandex.practicum.accounts.service.repository;
 
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.accounts.service.entity.AccountEntity;
 
 import java.util.UUID;
 
