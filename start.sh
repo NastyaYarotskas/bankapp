@@ -30,4 +30,4 @@ echo "Client Secret TRANSFER_SERVICE_CLIENT_SECRET:  ${TRANSFER_SERVICE_CLIENT_S
 # Запускаем приложение с переменной окружения
 docker compose up --build -d
 
-echo "Приложение доступно на http://localhost:8081"
+echo "Приложение доступно на http://localhost:9000"
