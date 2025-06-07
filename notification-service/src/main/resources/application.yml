@@ -5,14 +5,14 @@ spring:
   application:
     name: notification-service
   config:
-    import: optional:consul://localhost:8500
+    import: optional:consul://${CONSUL_HOST:localhost}:8500
   cloud:
     consul:
-      host: localhost
+      host: ${CONSUL_HOST:localhost}
       port: 8500
       config:
         enabled: true
-        prefixes: config
+        prefixes: config,secrets
         format: PROPERTIES
         default-context: application
         watch:

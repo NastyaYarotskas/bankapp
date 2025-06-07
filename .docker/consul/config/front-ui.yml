@@ -1,0 +1,4 @@
+exchange.service.url=http://api-gateway/exchange-service
+account.service.url=http://api-gateway/accounts-service
+cash.service.url=http://api-gateway/cash-service
+transfer.service.url=http://api-gateway/transfer-service
