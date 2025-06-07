@@ -30,8 +30,3 @@ mvnw.cmd clean install    # Windows
         ./start.sh
     ```
 3. Перейти по ссылке `http://localhost:9000/`
-
-TODO:
-* get rid of currency enum in accounts-service
-* currencies from one source
-* move duplicate conf to parent?
