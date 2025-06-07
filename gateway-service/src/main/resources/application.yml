@@ -6,7 +6,7 @@ spring:
     name: gateway-service
   cloud:
     consul:
-      host: localhost
+      host: ${CONSUL_HOST:localhost}
       port: 8500
       discovery:
         service-name: api-gateway
@@ -53,20 +53,6 @@ spring:
             - Path=/blocker-service/**
           filters:
             - RewritePath=/blocker-service/?(?<segment>.*), /$\{segment}
-
-#  security:
-#    oauth2:
-#      client:
-#        provider:
-#          keycloak:
-#            token-uri: http://keycloak:8080/realms/master/protocol/openid-connect/token
-#        registration:
-#          gateway-client:
-#            provider: keycloak
-#            client-id: gateway_client
-#            client-secret: jHW3UNzpxKQAg8vMpBb83ae1anM5R2PO
-#            scope: resource.read
-#            authorization-grant-type: client_credentials
 
 logging:
   level:

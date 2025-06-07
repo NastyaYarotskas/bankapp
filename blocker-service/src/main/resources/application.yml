@@ -6,7 +6,7 @@ spring:
     name: blocker-service
   cloud:
     consul:
-      host: localhost
+      host: ${CONSUL_HOST:localhost}
       port: 8500
       config:
         enabled: false
