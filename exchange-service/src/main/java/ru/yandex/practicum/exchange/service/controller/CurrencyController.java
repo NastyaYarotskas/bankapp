@@ -1,10 +1,11 @@
-package ru.yandex.practicum.exchange.service.feature.currency;
+package ru.yandex.practicum.exchange.service.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.exchange.service.model.Currency;
 
 import java.util.ArrayList;
 import java.util.List;

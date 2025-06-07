@@ -1,0 +1,25 @@
+server:
+  port: 9003
+
+spring:
+  application:
+    name: exchange-service
+  cloud:
+    consul:
+      host: ${CONSUL_HOST:localhost}
+      port: 8500
+      config:
+        enabled: false
+        prefixes: config
+        defaultContext: application
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUE_URL:http://keycloak:8080/realms/master}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true

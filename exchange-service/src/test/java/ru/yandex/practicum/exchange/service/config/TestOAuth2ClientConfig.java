@@ -1,4 +1,4 @@
-package ru.yandex.practicum.exchange.service.feature.currency;
+package ru.yandex.practicum.exchange.service.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 @EnableWebFluxSecurity
 @TestConfiguration
-public class TestSecurityConfig {
+public class TestOAuth2ClientConfig {
 
     @Bean
     @Primary

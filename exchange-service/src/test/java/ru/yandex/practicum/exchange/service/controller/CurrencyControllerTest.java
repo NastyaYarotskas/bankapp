@@ -1,4 +1,4 @@
-package ru.yandex.practicum.exchange.service.feature.currency;
+package ru.yandex.practicum.exchange.service.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +9,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import ru.yandex.practicum.exchange.service.config.TestOAuth2ClientConfig;
+import ru.yandex.practicum.exchange.service.model.Currency;
 
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-@Import(TestSecurityConfig.class)
+@Import(TestOAuth2ClientConfig.class)
 public class CurrencyControllerTest {
 
     @Autowired

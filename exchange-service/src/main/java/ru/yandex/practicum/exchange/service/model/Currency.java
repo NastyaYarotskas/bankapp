@@ -1,4 +1,4 @@
-package ru.yandex.practicum.exchange.service.feature.currency;
+package ru.yandex.practicum.exchange.service.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
