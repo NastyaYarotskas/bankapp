@@ -1,4 +1,4 @@
-package ru.yandex.practicum.exchange.generator.service.feature.config;
+package ru.yandex.practicum.exchange.generator.service.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;

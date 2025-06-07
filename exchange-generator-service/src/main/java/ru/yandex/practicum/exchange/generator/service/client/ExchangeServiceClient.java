@@ -1,4 +1,4 @@
-package ru.yandex.practicum.exchange.generator.service.feature.currency;
+package ru.yandex.practicum.exchange.generator.service.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.exchange.generator.service.model.Currency;
 
 @Component
 public class ExchangeServiceClient {

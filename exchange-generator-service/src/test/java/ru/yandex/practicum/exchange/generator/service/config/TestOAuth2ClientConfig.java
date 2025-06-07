@@ -1,4 +1,4 @@
-package ru.yandex.practicum.exchange.generator.service.feature.currency;
+package ru.yandex.practicum.exchange.generator.service.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 @EnableWebFluxSecurity
 @TestConfiguration
-public class TestSecurityConfig {
+public class TestOAuth2ClientConfig {
 
     @Bean
     @Primary

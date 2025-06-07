@@ -1,4 +1,4 @@
-package ru.yandex.practicum.exchange.generator.service.feature.config;
+package ru.yandex.practicum.exchange.generator.service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 
 @Configuration
-public class OAuth2ClientConfiguration {
+public class OAuth2ClientConfig {
 
     @Bean
     public ReactiveOAuth2AuthorizedClientManager auth2AuthorizedClientManager(

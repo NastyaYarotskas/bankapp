@@ -1,4 +1,4 @@
-package ru.yandex.practicum.exchange.generator.service.feature.error;
+package ru.yandex.practicum.exchange.generator.service.error;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.exchange.generator.service.feature.error;
+package ru.yandex.practicum.exchange.generator.service.error;
 
 import java.time.Instant;
 

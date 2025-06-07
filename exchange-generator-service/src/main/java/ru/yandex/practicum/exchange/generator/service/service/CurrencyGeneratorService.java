@@ -1,9 +1,11 @@
-package ru.yandex.practicum.exchange.generator.service.feature.currency;
+package ru.yandex.practicum.exchange.generator.service.service;
 
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.exchange.generator.service.client.ExchangeServiceClient;
+import ru.yandex.practicum.exchange.generator.service.model.Currency;
 
 import java.util.List;
 import java.util.Random;
