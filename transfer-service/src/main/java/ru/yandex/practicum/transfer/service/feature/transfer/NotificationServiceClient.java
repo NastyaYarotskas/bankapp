@@ -1,6 +1,7 @@
 package ru.yandex.practicum.transfer.service.feature.transfer;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
@@ -14,13 +15,11 @@ import reactor.core.publisher.Mono;
 @Component
 public class NotificationServiceClient {
 
-    private final WebClient notificationServiceWebClient;
+    @Autowired
+    @Qualifier("notificationServiceWebClient")
+    private WebClient notificationServiceWebClient;
     @Autowired
     private ReactiveOAuth2AuthorizedClientManager manager;
-
-    public NotificationServiceClient(@LoadBalanced WebClient.Builder notificationServiceWebClientBuilder) {
-        this.notificationServiceWebClient = notificationServiceWebClientBuilder.build();
-    }
 
     public Mono<Void> sendNotification(NotificationRequest request) {
         return retrieveToken()

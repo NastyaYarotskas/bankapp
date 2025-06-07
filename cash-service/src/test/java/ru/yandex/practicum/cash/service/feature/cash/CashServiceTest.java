@@ -96,7 +96,7 @@ class CashServiceTest {
     @Test
     void processAccountTransaction_insufficientFunds_shouldReturnError() {
         String login = "test_edit_user_login";
-        CashChangeRequest request = new CashChangeRequest("USD", 1000, CashChangeRequest.Action.GET);
+        CashChangeRequest request = new CashChangeRequest("USD", 2000, CashChangeRequest.Action.GET);
 
         StepVerifier.create(cashService.processAccountTransaction(login, request))
                 .expectErrorMatches(throwable ->

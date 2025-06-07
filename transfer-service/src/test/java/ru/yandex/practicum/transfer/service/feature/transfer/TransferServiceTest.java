@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
+import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
@@ -12,15 +14,10 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import ru.yandex.practicum.transfer.service.feature.transfer.model.Account;
-import ru.yandex.practicum.transfer.service.feature.transfer.model.Currency;
-import ru.yandex.practicum.transfer.service.feature.transfer.model.User;
 
 import java.time.Instant;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -28,23 +25,20 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER;
 
 @SpringBootTest
-@Import({TestSecurityConfig.class})
+@AutoConfigureStubRunner(
+        ids = {
+                "ru.yandex.practicum:blocker-service:+:stubs:9002",
+                "ru.yandex.practicum:notification-service:+:stubs:9001",
+                "ru.yandex.practicum:accounts-service:+:stubs:9003",
+                "ru.yandex.practicum:exchange-service:+:stubs:9004"
+        },
+        stubsMode = StubRunnerProperties.StubsMode.LOCAL
+)
+@Import({TestConfig.class, TestSecurityConfig.class})
 public class TransferServiceTest {
 
     @MockitoBean
     private ReactiveOAuth2AuthorizedClientManager manager;
-
-    @MockitoBean
-    private AccountsServiceClient accountsServiceClient;
-
-    @MockitoBean
-    private ExchangeServiceClient exchangeServiceClient;
-
-    @MockitoBean
-    private BlockerServiceClient blockerServiceClient;
-
-    @MockitoBean
-    private NotificationServiceClient notificationServiceClient;
 
     @Autowired
     private TransferService transferService;
@@ -66,24 +60,11 @@ public class TransferServiceTest {
     @Test
     void transfer_validRequest_shouldTransferSuccessfully() {
         TransferRequest request = new TransferRequest();
-        request.setLogin("user1");
-        request.setToLogin("user2");
+        request.setLogin("test_edit_user_login");
+        request.setToLogin("test_edit_user_login");
         request.setFromCurrency("RUB");
         request.setToCurrency("USD");
-        request.setValue(1000);
-
-        User fromUser = createUser("user1", "RUB", 2000);
-        User toUser = createUser("user2", "USD", 100);
-
-        Currency rub = new Currency("RUB", "RUB",1.0);
-        Currency usd = new Currency("USD", "USD",75.0);
-
-        when(accountsServiceClient.getAccountDetails("user1")).thenReturn(Mono.just(fromUser));
-        when(accountsServiceClient.getAccountDetails("user2")).thenReturn(Mono.just(toUser));
-        when(exchangeServiceClient.getCurrencyRates()).thenReturn(Flux.fromIterable(List.of(rub, usd)));
-        when(blockerServiceClient.performOperation(any())).thenReturn(Mono.just(new OperationCheckResult(false, "OK", null)));
-        when(accountsServiceClient.editUserAccounts(any(), any())).thenReturn(Mono.empty());
-        when(notificationServiceClient.sendNotification(any())).thenReturn(Mono.empty());
+        request.setValue(10);
 
         StepVerifier.create(transferService.transfer(request))
                 .verifyComplete();
@@ -102,18 +83,11 @@ public class TransferServiceTest {
     @Test
     void transfer_insufficientFunds_shouldFail() {
         TransferRequest request = new TransferRequest();
-        request.setLogin("user1");
-        request.setToLogin("user2");
+        request.setLogin("test_edit_user_login");
+        request.setToLogin("test_edit_user_login");
         request.setFromCurrency("RUB");
         request.setToCurrency("USD");
         request.setValue(2000);
-
-        User fromUser = createUser("user1", "RUB", 1000);
-        User toUser = createUser("user2", "USD", 100);
-
-        when(accountsServiceClient.getAccountDetails("user1")).thenReturn(Mono.just(fromUser));
-        when(accountsServiceClient.getAccountDetails("user2")).thenReturn(Mono.just(toUser));
-        when(notificationServiceClient.sendNotification(any())).thenReturn(Mono.empty());
 
         StepVerifier.create(transferService.transfer(request))
                 .expectError(ResponseStatusException.class)
@@ -123,34 +97,14 @@ public class TransferServiceTest {
     @Test
     void transfer_blocked_shouldFail() {
         TransferRequest request = new TransferRequest();
-        request.setLogin("user1");
-        request.setToLogin("user2");
+        request.setLogin("test_edit_user_login");
+        request.setToLogin("test_edit_user_login");
         request.setFromCurrency("RUB");
         request.setToCurrency("USD");
-        request.setValue(1000);
-
-        User fromUser = createUser("user1", "RUB", 2000);
-        User toUser = createUser("user2", "USD", 100);
-
-        when(accountsServiceClient.getAccountDetails("user1")).thenReturn(Mono.just(fromUser));
-        when(accountsServiceClient.getAccountDetails("user2")).thenReturn(Mono.just(toUser));
-        when(blockerServiceClient.performOperation(any()))
-                .thenReturn(Mono.just(new OperationCheckResult(true, "Подозрительная операция", "algorithm1")));
-        when(notificationServiceClient.sendNotification(any())).thenReturn(Mono.empty());
+        request.setValue(1000000);
 
         StepVerifier.create(transferService.transfer(request))
                 .expectError(ResponseStatusException.class)
                 .verify();
-    }
-
-    private User createUser(String login, String currency, double balance) {
-        User user = new User();
-        user.setLogin(login);
-        Account account = new Account();
-        account.setCurrency(new Currency(currency, currency, 1.0));
-        account.setValue((int) balance);
-        account.setExists(true);
-        user.setAccounts(List.of(account));
-        return user;
     }
 }
