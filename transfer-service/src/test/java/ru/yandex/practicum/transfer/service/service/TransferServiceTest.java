@@ -1,4 +1,4 @@
-package ru.yandex.practicum.transfer.service.feature.transfer.service;
+package ru.yandex.practicum.transfer.service.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,10 +16,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import ru.yandex.practicum.transfer.service.feature.transfer.config.TestWebClientConfig;
-import ru.yandex.practicum.transfer.service.feature.transfer.config.TestOAuth2ClientConfig;
+import ru.yandex.practicum.transfer.service.config.TestWebClientConfig;
+import ru.yandex.practicum.transfer.service.config.TestOAuth2ClientConfig;
 import ru.yandex.practicum.transfer.service.request.TransferRequest;
-import ru.yandex.practicum.transfer.service.service.TransferService;
 
 import java.time.Instant;
 

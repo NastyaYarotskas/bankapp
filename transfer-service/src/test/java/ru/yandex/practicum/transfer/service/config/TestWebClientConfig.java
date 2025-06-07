@@ -1,4 +1,4 @@
-package ru.yandex.practicum.transfer.service.feature.transfer.config;
+package ru.yandex.practicum.transfer.service.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
