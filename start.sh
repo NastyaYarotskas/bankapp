@@ -1,10 +1,24 @@
 #!/bin/bash
 
 # Запускаем Keycloak
-docker compose up -d keycloak-secret-loader consul-config-loader consul-client --build
+docker compose up -d keycloak-config-loader --build
 
 # Ждем пока Keycloak станет доступен
 while ! curl -s http://localhost:8080; do
+  sleep 5
+done
+
+docker compose up -d consul-server consul-config-loader consul-client --build
+
+while ! curl -s http://localhost:8500; do
+  sleep 5
+done
+
+docker compose up -d keycloak-secret-loader --build
+
+# Ждем, пока секрет не будет доступен
+while [ -z "$(curl -s 'http://localhost:8500/v1/kv/secrets/FRONT_UI_SERVICE/client-secret?raw')" ]; do
+  echo "Ожидание создания секрета..."
   sleep 5
 done
 
