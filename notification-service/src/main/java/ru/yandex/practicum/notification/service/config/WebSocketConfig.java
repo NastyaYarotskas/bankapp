@@ -1,4 +1,4 @@
-package ru.yandex.practicum.notification.service.feature.notification;
+package ru.yandex.practicum.notification.service.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
