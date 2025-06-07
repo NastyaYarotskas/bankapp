@@ -1,4 +1,4 @@
-package ru.yandex.practicum.cash.service.feature.cash;
+package ru.yandex.practicum.cash.service.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.cash.service.feature.cash;
+package ru.yandex.practicum.cash.service.request;
 
 public record OperationRequest(String userId, String operationType, double amount) {
 }

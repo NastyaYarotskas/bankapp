@@ -1,4 +1,4 @@
-package ru.yandex.practicum.cash.service.feature.error;
+package ru.yandex.practicum.cash.service.error;
 
 import java.time.Instant;
 

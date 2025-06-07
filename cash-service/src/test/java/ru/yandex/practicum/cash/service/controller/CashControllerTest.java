@@ -1,4 +1,4 @@
-package ru.yandex.practicum.cash.service.feature.cash;
+package ru.yandex.practicum.cash.service.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +11,9 @@ import org.springframework.security.test.web.reactive.server.SecurityMockServerC
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.cash.service.config.TestOAuth2ClientConfig;
+import ru.yandex.practicum.cash.service.request.CashChangeRequest;
+import ru.yandex.practicum.cash.service.service.CashService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,7 +22,7 @@ import static org.springframework.security.test.web.reactive.server.SecurityMock
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-@Import(TestSecurityConfig.class)
+@Import(TestOAuth2ClientConfig.class)
 public class CashControllerTest {
 
     @Autowired

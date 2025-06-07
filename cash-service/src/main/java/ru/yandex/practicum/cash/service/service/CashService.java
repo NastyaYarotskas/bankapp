@@ -1,4 +1,4 @@
-package ru.yandex.practicum.cash.service.feature.cash;
+package ru.yandex.practicum.cash.service.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,10 +6,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.cash.service.client.AccountsServiceClient;
+import ru.yandex.practicum.cash.service.client.BlockerServiceClient;
+import ru.yandex.practicum.cash.service.client.NotificationServiceClient;
+import ru.yandex.practicum.cash.service.request.CashChangeRequest;
+import ru.yandex.practicum.cash.service.request.NotificationRequest;
+import ru.yandex.practicum.cash.service.request.OperationRequest;
+import ru.yandex.practicum.cash.service.model.Account;
+import ru.yandex.practicum.cash.service.model.User;
 
 @Slf4j
 @Service
 public class CashService {
+
     private static final String ERROR_EMPTY_REQUEST = "Запрос или валюта не могут быть пустыми";
     private static final String ERROR_NEGATIVE_AMOUNT = "Сумма должна быть больше нуля";
     private static final String ERROR_ACCOUNT_NOT_FOUND = "Счет с указанной валютой не найден";

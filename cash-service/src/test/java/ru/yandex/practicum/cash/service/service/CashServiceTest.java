@@ -1,4 +1,4 @@
-package ru.yandex.practicum.cash.service.feature.cash;
+package ru.yandex.practicum.cash.service.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +17,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import ru.yandex.practicum.cash.service.config.TestWebClientConfig;
+import ru.yandex.practicum.cash.service.config.TestOAuth2ClientConfig;
+import ru.yandex.practicum.cash.service.request.CashChangeRequest;
 
 import java.time.Instant;
 
@@ -34,7 +37,7 @@ import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenTy
         },
         stubsMode = StubRunnerProperties.StubsMode.LOCAL
 )
-@Import({TestConfig.class, TestSecurityConfig.class})
+@Import({TestWebClientConfig.class, TestOAuth2ClientConfig.class})
 class CashServiceTest {
 
     @MockitoBean
