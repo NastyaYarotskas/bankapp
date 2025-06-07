@@ -59,3 +59,30 @@ services:
       - "8080:8080"
     command:
       - start-dev
+
+  keycloak-config-loader:
+    build:
+      context: ./.docker/keycloak-config-loader
+      dockerfile: Dockerfile
+    container_name: keycloak-config-loader
+    volumes:
+      - ./.docker:/docker
+    environment:
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KEYCLOAK_REALM=master
+    entrypoint: [ ]
+    command: >
+      /bin/sh -c "
+      echo 'Ожидание готовности Keycloak...' &&
+      while ! curl -s http://keycloak:8080; do
+        sleep 5;
+      done &&
+      echo 'Keycloak готов - начинаем конфигурацию' &&
+      echo 'Загрузка скоупов...' &&
+      sh /app/scripts/upload-scopes-to-keycloak.sh &&
+      echo 'Загрузка клиентов...' &&
+      sh /app/scripts/upload-clients-to-keycloak.sh"
+    depends_on:
+      - keycloak
