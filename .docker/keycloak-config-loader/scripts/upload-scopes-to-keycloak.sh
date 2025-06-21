@@ -1,11 +1,11 @@
 #!/bin/bash
 
-KEYCLOAK_URL="http://keycloak:8080"
+KEYCLOAK_URL="http://localhost:8080/"
 REALM="master"
 CLIENT_ID="admin-cli"
 USERNAME="admin"
 PASSWORD="admin"
-SCOPES_DIR="keycloak/scopes"
+SCOPES_DIR="scopes"
 
 if [ ! -d "$SCOPES_DIR" ]; then
     echo "Ошибка: Директория $SCOPES_DIR не существует"

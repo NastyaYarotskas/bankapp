@@ -27,7 +27,7 @@ public class OAuth2ClientConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/index.html",
-                                "/actuator/health"
+                                "/actuator/**"
                         ).permitAll()
                         .pathMatchers("/users/**").hasAnyAuthority("SCOPE_transfer.write")
                         .anyExchange().authenticated()

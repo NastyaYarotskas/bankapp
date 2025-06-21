@@ -1,7 +1,6 @@
 package ru.yandex.practicum.front.ui.feature.currency;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -20,7 +19,7 @@ public class ExchangeServiceClient {
     @Autowired
     private ReactiveOAuth2AuthorizedClientManager manager;
 
-    public ExchangeServiceClient(@LoadBalanced WebClient.Builder exchangeServiceWebClientBuilder) {
+    public ExchangeServiceClient(WebClient.Builder exchangeServiceWebClientBuilder) {
         this.exchangeServiceWebClient = exchangeServiceWebClientBuilder.build();
     }
 

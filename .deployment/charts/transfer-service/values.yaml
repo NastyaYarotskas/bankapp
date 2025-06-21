@@ -1,0 +1,42 @@
+replicaCount: 1
+
+image:
+  repository: bankapp-transfer-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 9004
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: { }
+  name: ""
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: transfer-service.test.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+environment:
+  KEYCLOAK_ISSUE_URL: http://keycloak:8080/realms/master
+  ACCOUNT_SERVICE_URL: http://{{ .Release.Name }}-accounts-service:9001
+  BLOCKER_SERVICE_URL: http://{{ .Release.Name }}-blocker-service:9008
+  NOTIFICATION_SERVICE_URL: http://{{ .Release.Name }}-notification-service:9009
+  EXCHANGE_SERVICE_URL: http://{{ .Release.Name }}-exchange-service:9003
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80

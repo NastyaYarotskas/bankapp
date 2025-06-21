@@ -8,12 +8,6 @@ while ! curl -s http://localhost:8080; do
   sleep 5
 done
 
-docker compose up -d consul-server consul-config-loader consul-client --build
-
-while ! curl -s http://localhost:8500; do
-  sleep 5
-done
-
 docker compose up -d keycloak-secret-loader --build
 
 # Ждем, пока секрет не будет доступен

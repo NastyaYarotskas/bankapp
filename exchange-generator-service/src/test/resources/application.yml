@@ -1,11 +1,4 @@
 spring:
-  cloud:
-    consul:
-      enabled: false
-      config:
-        enabled: false
-      discovery:
-        enabled: false
   task:
     scheduling:
       enabled: false

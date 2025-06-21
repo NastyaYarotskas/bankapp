@@ -1,22 +1,29 @@
 server:
   port: 9002
 
+account:
+  service:
+    url: ${ACCOUNT_SERVICE_URL:http://localhost:9001}
+blocker:
+  service:
+    url: ${BLOCKER_SERVICE_URL:http://localhost:9008}
+notification:
+  service:
+    url: ${NOTIFICATION_SERVICE_URL:http://localhost:9009}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 spring:
   application:
     name: cash-service
-  config:
-    import: optional:consul://${CONSUL_HOST:localhost}:8500
-  cloud:
-    consul:
-      host: ${CONSUL_HOST:localhost}
-      port: 8500
-      config:
-        enabled: true
-        prefixes: config,secrets
-        format: PROPERTIES
-        default-context: application
-        watch:
-          enabled: true
   security:
     oauth2:
       resourceserver:

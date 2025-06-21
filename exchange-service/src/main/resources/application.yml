@@ -1,17 +1,19 @@
 server:
   port: 9003
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 spring:
   application:
     name: exchange-service
-  cloud:
-    consul:
-      host: ${CONSUL_HOST:localhost}
-      port: 8500
-      config:
-        enabled: false
-        prefixes: config
-        defaultContext: application
   security:
     oauth2:
       resourceserver:

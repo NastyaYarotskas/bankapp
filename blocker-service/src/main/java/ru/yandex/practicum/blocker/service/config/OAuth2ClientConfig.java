@@ -22,7 +22,7 @@ public class OAuth2ClientConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/index.html",
-                                "/actuator/health"
+                                "/actuator/**"
                         ).permitAll()
                         .pathMatchers("/api/operations").hasAnyAuthority("SCOPE_blocker.read")
                         .anyExchange().authenticated()
