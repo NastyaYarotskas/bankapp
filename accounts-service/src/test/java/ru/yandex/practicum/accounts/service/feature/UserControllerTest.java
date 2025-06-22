@@ -38,9 +38,7 @@ import static org.springframework.security.test.web.reactive.server.SecurityMock
 import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.CONFIRMATION_ERROR_MSG;
 import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.USER_NOT_FOUND_ERROR_MSG;
 
-@SpringBootTest(properties = {
-        "spring.autoconfigure.exclude=org.springframework.cloud.contract.stubrunner.spring.cloud.consul.StubRunnerSpringCloudConsulAutoConfiguration"
-})
+@SpringBootTest
 @AutoConfigureWebTestClient
 @Import(TestSecurityConfig.class)
 public class UserControllerTest extends BaseTest {

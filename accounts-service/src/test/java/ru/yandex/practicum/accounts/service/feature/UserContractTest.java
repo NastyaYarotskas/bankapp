@@ -27,9 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER;
 
-@SpringBootTest(properties = {
-        "spring.autoconfigure.exclude=org.springframework.cloud.contract.stubrunner.spring.cloud.consul.StubRunnerSpringCloudConsulAutoConfiguration"
-})
+@SpringBootTest
 @AutoConfigureWebTestClient
 @AutoConfigureStubRunner(
         ids = "ru.yandex.practicum:notification-service:+:stubs:8888",
