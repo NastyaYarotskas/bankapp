@@ -1,0 +1,30 @@
+dependencies:
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 14.2.3
+- name: accounts-service
+  repository: file://./charts/accounts-service
+  version: 0.1.0
+- name: blocker-service
+  repository: file://./charts/blocker-service
+  version: 0.1.0
+- name: cash-service
+  repository: file://./charts/cash-service
+  version: 0.1.0
+- name: exchange-generator-service
+  repository: file://./charts/exchange-generator-service
+  version: 0.1.0
+- name: exchange-service
+  repository: file://./charts/exchange-service
+  version: 0.1.0
+- name: front-ui
+  repository: file://./charts/front-ui
+  version: 0.1.0
+- name: notification-service
+  repository: file://./charts/notification-service
+  version: 0.1.0
+- name: transfer-service
+  repository: file://./charts/transfer-service
+  version: 0.1.0
+digest: sha256:f007eaf55da26fb3fec8cd9e95afce9c2a64e42d3adf6cdb5f16998cd7f6e552
+generated: "2025-06-21T14:55:13.941521+03:00"

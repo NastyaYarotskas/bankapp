@@ -1,15 +1,19 @@
 server:
   port: 9008
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 spring:
   application:
     name: blocker-service
-  cloud:
-    consul:
-      host: ${CONSUL_HOST:localhost}
-      port: 8500
-      config:
-        enabled: false
   security:
     oauth2:
       resourceserver:

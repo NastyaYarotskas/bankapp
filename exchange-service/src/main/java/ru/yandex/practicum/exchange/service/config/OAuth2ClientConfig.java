@@ -22,7 +22,7 @@ public class OAuth2ClientConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/index.html",
-                                "/actuator/health"
+                                "/actuator/**"
                         ).permitAll()
                         .pathMatchers("/api/currencies/**").hasAnyAuthority("SCOPE_exchange.write", "SCOPE_exchange.read")
                         .anyExchange().authenticated()

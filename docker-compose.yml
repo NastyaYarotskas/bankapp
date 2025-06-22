@@ -18,7 +18,6 @@ services:
       - KEYCLOAK_URL=http://keycloak:8080
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
-      - CONSUL_URL=http://consul-server:8500
     volumes:
       - ./.docker:/docker
     command: >
@@ -30,7 +29,6 @@ services:
       sh /app/scripts/get-secrets.sh"
     depends_on:
       - keycloak
-      - consul-server
 
   accounts-service:
     container_name: accounts-service
@@ -40,7 +38,6 @@ services:
     environment:
       - SPRING_R2DBC_URL=r2dbc:postgresql://accounts-service-db:5432/accounts_service_db
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
-      - CONSUL_HOST=consul-client
       - CLIENT_SECRET=${ACCOUNTS_SERVICE_CLIENT_SECRET}
     ports:
       - "9001:9001"
@@ -55,7 +52,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
-      - CONSUL_HOST=consul-client
     ports:
       - "9008:9008"
     depends_on:
@@ -68,7 +64,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
-      - CONSUL_HOST=consul-client
       - CLIENT_SECRET=${CASH_SERVICE_CLIENT_SECRET}
     ports:
       - "9002:9002"
@@ -82,7 +77,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
-      - CONSUL_HOST=consul-client
       - CLIENT_SECRET=${EXCHANGE_GENERATOR_SERVICE_CLIENT_SECRET}
     ports:
       - "9007:9007"
@@ -96,7 +90,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
-      - CONSUL_HOST=consul-client
     ports:
       - "9003:9003"
     depends_on:
@@ -109,7 +102,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
-      - CONSUL_HOST=consul-client
       - CLIENT_SECRET=${FRONT_UI_SERVICE_CLIENT_SECRET}
     ports:
       - "9000:9000"
@@ -123,7 +115,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
-      - CONSUL_HOST=consul-client
     ports:
       - "9006:9006"
     depends_on:
@@ -136,7 +127,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
-      - CONSUL_HOST=consul-client
     ports:
       - "9009:9009"
     depends_on:
@@ -149,51 +139,11 @@ services:
       dockerfile: Dockerfile
     environment:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
-      - CONSUL_HOST=consul-client
       - CLIENT_SECRET=${TRANSFER_SERVICE_CLIENT_SECRET}
     ports:
       - "9004:9004"
     depends_on:
       - keycloak-secret-loader
-
-  consul-server:
-    image: hashicorp/consul:1.15
-    container_name: consul-server
-    command: "agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0"
-    environment:
-      - CONSUL_LOCAL_CONFIG={"datacenter":"dc1", "log_level":"INFO", "server":true}
-    ports:
-      - "8500:8500" # UI
-      - "8600:8600/udp" # DNS
-      - "8300:8300" # Server RPC
-      - "8301:8301" # Serf LAN
-      - "8302:8302" # Serf WAN
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  consul-config-loader:
-    image: curlimages/curl:latest
-    container_name: consul-config-loader
-    volumes:
-      - ./.docker:/docker
-    command: [ "/bin/sh", "/docker/consul/upload-to-consul.sh" ]
-    depends_on:
-      consul-server:
-        condition: service_healthy
-
-  consul-client:
-    image: hashicorp/consul:1.15
-    container_name: consul-client
-    command: "agent -node=client-1 -join=consul-server -client=0.0.0.0"
-    depends_on:
-      - consul-server
-    environment:
-      - CONSUL_LOCAL_CONFIG={"datacenter":"dc1", "log_level":"INFO"}
-    ports:
-      - "8501:8500"
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest

@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Конфигурация
-KEYCLOAK_URL="http://keycloak:8080"
+KEYCLOAK_URL="http://localhost:8080/"
 REALM="master"
 CLIENT_ID="admin-cli"
 USERNAME="admin"
 PASSWORD="admin"  # Изменено на admin согласно docker-compose.yml
-CLIENTS_DIR="keycloak/clients"
+CLIENTS_DIR="clients"
 
 # Проверка существования директории
 if [ ! -d "$CLIENTS_DIR" ]; then

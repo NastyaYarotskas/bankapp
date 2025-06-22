@@ -9,8 +9,8 @@ RUN mkdir -p /app/scripts /app/keycloak/scopes /app/keycloak/clients
 
 # Копируем скрипты и конфигурации
 COPY scripts/*.sh /app/scripts/
-COPY keycloak/scopes/* /app/keycloak/scopes/
-COPY keycloak/clients/* /app/keycloak/clients/
+COPY scripts/scopes/* /app/keycloak/scopes/
+COPY scripts/clients/* /app/keycloak/clients/
 
 # Устанавливаем права на выполнение
 RUN chmod +x /app/scripts/*.sh

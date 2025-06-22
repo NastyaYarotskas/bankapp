@@ -30,10 +30,10 @@ import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenTy
 @SpringBootTest
 @AutoConfigureWebTestClient
 @AutoConfigureStubRunner(
-        ids = "ru.yandex.practicum:notification-service:+:stubs:9001",
+        ids = "ru.yandex.practicum:notification-service:+:stubs:8888",
         stubsMode = StubRunnerProperties.StubsMode.LOCAL
 )
-@Import({TestConfig.class, TestSecurityConfig.class, OAuth2ClientTestConfig.class})
+@Import({TestSecurityConfig.class, OAuth2ClientTestConfig.class})
 public class UserContractTest extends BaseTest {
 
     @Autowired

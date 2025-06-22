@@ -40,10 +40,10 @@ import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenTy
 import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.*;
 
 @AutoConfigureStubRunner(
-        ids = "ru.yandex.practicum:notification-service:+:stubs:9001",
+        ids = "ru.yandex.practicum:notification-service:+:stubs:8888",
         stubsMode = StubRunnerProperties.StubsMode.LOCAL
 )
-@Import({TestConfig.class, TestSecurityConfig.class})
+@Import({TestSecurityConfig.class})
 public class UserServiceTest extends BaseTest {
 
     @MockitoBean
