@@ -8,6 +8,7 @@ pipeline {
         DB_NAME         = 'mydb'
         DB_USER         = 'myuser'
         IMAGE_TAG       = "${env.BUILD_NUMBER}"
+        KUBECONFIG = '/var/jenkins_home/.kube/config'
     }
 
     stages {
@@ -58,9 +59,9 @@ pipeline {
 //             }
 //         }
 
-        stage('Docker info') {
+        stage('Test kubectl') {
                     steps {
-                        sh 'docker info'
+                        sh 'kubectl get pods'
                     }
                 }
 
