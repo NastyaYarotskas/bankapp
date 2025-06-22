@@ -58,6 +58,12 @@ pipeline {
 //             }
 //         }
 
+        stage('Docker info') {
+                    steps {
+                        sh 'docker info'
+                    }
+                }
+
         stage('Helm Deploy to TEST') {
             steps {
                 sh """
