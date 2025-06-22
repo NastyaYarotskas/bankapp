@@ -68,6 +68,7 @@ pipeline {
         stage('Helm Deploy to TEST') {
             steps {
                 sh """
+                helm dependency update .deployment
                 helm upgrade --install bankapp .deployment --namespace test --kube-insecure-skip-tls-verify
                 """
             }
