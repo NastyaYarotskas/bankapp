@@ -26,7 +26,7 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 sh """
-                docker build -t ${DOCKER_REGISTRY}/accounts-service:latest accounts-service
+                docker build -t ghcr.io/nastyayarotskas/accounts-service:latest accounts-service
                 """
             }
         }
