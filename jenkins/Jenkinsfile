@@ -53,8 +53,7 @@ pipeline {
         stage('Install Keycloak to TEST') {
             steps {
                 sh """
-                kubectl create namespace test
-                kubectl apply -f keycloak-deployment.yaml -n test --create-namespace
+                kubectl apply -f keycloak-deployment.yaml -n test
                 """
             }
         }
