@@ -23,14 +23,14 @@ pipeline {
             }
         }
 
-//         stage('Build Docker Images') {
-//             steps {
-//                 sh """
-//                 docker build -t ${DOCKER_REGISTRY}/accounts-service:latest accounts-service
-//                 """
-//             }
-//         }
-//
+        stage('Build Docker Images') {
+            steps {
+                sh """
+                docker build -t ${DOCKER_REGISTRY}/accounts-service:latest accounts-service
+                """
+            }
+        }
+
 //         stage('Push Docker Images') {
 //             steps {
 //                 withCredentials([string(credentialsId: 'GHCR_TOKEN', variable: 'GHCR_TOKEN')]) {
