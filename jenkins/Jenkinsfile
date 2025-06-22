@@ -61,7 +61,7 @@ pipeline {
         stage('Helm Deploy to TEST') {
             steps {
                 sh """
-                helm upgrade --install bankapp .deployment --namespace test
+                helm upgrade --install bankapp .deployment --namespace test --insecure-skip-tls-verify
                 """
             }
         }
