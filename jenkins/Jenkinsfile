@@ -50,13 +50,13 @@ pipeline {
 //             }
 //         }
 
-        stage('Install Keycloak to TEST') {
-            steps {
-                sh """
-                kubectl apply -f keycloak-deployment.yaml -n test
-                """
-            }
-        }
+//         stage('Install Keycloak to TEST') {
+//             steps {
+//                 sh """
+//                 kubectl apply -f keycloak-deployment.yaml -n test
+//                 """
+//             }
+//         }
 
         stage('Helm Deploy to TEST') {
             steps {
