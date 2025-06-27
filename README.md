@@ -71,3 +71,15 @@ helm uninstall bankapp
 
 6. Использовать `minikube tunnel`
 7. Перейти по ссылке `localhost:9000`
+
+### Как запускать helm test
+
+1. перейти в папку `.deployment` и выполнить комманды:
+
+```bush
+helm lint . 
+
+helm install --dry-run bankapp . 
+
+helm test bankapp 
+```
