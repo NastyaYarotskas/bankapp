@@ -3,11 +3,7 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY = credentials('DOCKER_REGISTRY')
-        DB_PASSWORD     = credentials('DB_PASSWORD')
         GITHUB_USERNAME = credentials('GITHUB_USERNAME')
-        DB_NAME         = 'mydb'
-        DB_USER         = 'myuser'
-        IMAGE_TAG       = "${env.BUILD_NUMBER}"
         KUBECONFIG = '/root/.kube/config'
     }
 
