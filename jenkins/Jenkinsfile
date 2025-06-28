@@ -64,7 +64,7 @@ pipeline {
             steps {
                 sh """
                 helm dependency update .deployment
-                helm upgrade --install bankapp .deployment --namespace test --kube-insecure-skip-tls-verify
+                helm upgrade --install bankapp .deployment --namespace test --kube-insecure-skip-tls-verify --create-namespace
                 """
             }
         }
@@ -79,7 +79,7 @@ pipeline {
             steps {
                 sh """
                 helm dependency update .deployment
-                helm upgrade --install bankapp .deployment --namespace prod --kube-insecure-skip-tls-verify
+                helm upgrade --install bankapp .deployment --namespace prod --kube-insecure-skip-tls-verify --create-namespace
                 """
             }
         }
