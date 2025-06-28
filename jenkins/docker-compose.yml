@@ -14,6 +14,15 @@ services:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
       - ${KUBECONFIG_PATH}:/root/.kube/config
+      - $HOME/.kube:/var/jenkins_home/.kube
+      - $HOME/.minikube:/var/jenkins_home/.minikube
+      - ~/.minikube:/var/jenkins_home/.minikube
+    networks:
+      - minikube
+
+networks:
+  minikube:
+    external: true
 
 volumes:
   jenkins_home:

@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: healthtest
+  namespace: default
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: accounts-service-test
+      image: busybox
+      command: [ 'wget' ]
+      args: [ '{{ .Release.Name }}-accounts-service:9001/actuator/health' ]
+
+    - name: blocker-service-test
+      image: busybox
+      command: ['wget']
+      args: ['{{ .Release.Name }}-blocker-service:9008/actuator/health']
+
+    - name: cash-service-test
+      image: busybox
+      command: [ 'wget' ]
+      args: [ '{{ .Release.Name }}-cash-service:9002/actuator/health' ]
+
+    - name: exchange-generator-service-test
+      image: busybox
+      command: [ 'wget' ]
+      args: [ '{{ .Release.Name }}-exchange-generator-service:9007/actuator/health' ]
+
+    - name: exchange-service-test
+      image: busybox
+      command: [ 'wget' ]
+      args: [ '{{ .Release.Name }}-exchange-service:9003/actuator/health' ]
+
+    - name: front-ui-test
+      image: busybox
+      command: [ 'wget' ]
+      args: [ '{{ .Release.Name }}-front-ui:9000/actuator/health' ]
+
+    - name: transfer-service-test
+      image: busybox
+      command: [ 'wget' ]
+      args: [ '{{ .Release.Name }}-transfer-service:9004/actuator/health' ]
+  restartPolicy: Never # не производить попытки рестарта после завершения работы
