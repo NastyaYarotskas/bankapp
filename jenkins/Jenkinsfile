@@ -21,14 +21,14 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 sh """
-                docker build -t ghcr.io/nastyayarotskas/bankapp-accounts-service:latest accounts-service
-                docker build -t ghcr.io/nastyayarotskas/bankapp-blocker-service:latest blocker-service
-                docker build -t ghcr.io/nastyayarotskas/bankapp-cash-service:latest cash-service
-                docker build -t ghcr.io/nastyayarotskas/bankapp-exchange-generator-service:latest exchange-generator-service
-                docker build -t ghcr.io/nastyayarotskas/bankapp-exchange-service:latest exchange-service
-                docker build -t ghcr.io/nastyayarotskas/bankapp-front-ui:latest front-ui
-                docker build -t ghcr.io/nastyayarotskas/bankapp-notification-service:latest notification-service
-                docker build -t ghcr.io/nastyayarotskas/bankapp-transfer-service:latest transfer-service
+                docker build -t ${DOCKER_REGISTRY}/bankapp-accounts-service:latest accounts-service
+                docker build -t ${DOCKER_REGISTRY}/bankapp-blocker-service:latest blocker-service
+                docker build -t ${DOCKER_REGISTRY}/bankapp-cash-service:latest cash-service
+                docker build -t ${DOCKER_REGISTRY}/bankapp-exchange-generator-service:latest exchange-generator-service
+                docker build -t ${DOCKER_REGISTRY}/bankapp-exchange-service:latest exchange-service
+                docker build -t ${DOCKER_REGISTRY}/bankapp-front-ui:latest front-ui
+                docker build -t ${DOCKER_REGISTRY}/bankapp-notification-service:latest notification-service
+                docker build -t ${DOCKER_REGISTRY}/bankapp-transfer-service:latest transfer-service
                 """
             }
         }
@@ -38,14 +38,14 @@ pipeline {
                 withCredentials([string(credentialsId: 'GHCR_TOKEN', variable: 'GHCR_TOKEN')]) {
                     sh """
                     echo \$GHCR_TOKEN | docker login ghcr.io -u ${GITHUB_USERNAME} --password-stdin
-                    docker push ghcr.io/nastyayarotskas/bankapp-accounts-service:latest
-                    docker push ghcr.io/nastyayarotskas/bankapp-blocker-service:latest
-                    docker push ghcr.io/nastyayarotskas/bankapp-cash-service:latest
-                    docker push ghcr.io/nastyayarotskas/bankapp-exchange-generator-service:latest
-                    docker push ghcr.io/nastyayarotskas/bankapp-exchange-service:latest
-                    docker push ghcr.io/nastyayarotskas/bankapp-front-ui:latest
-                    docker push ghcr.io/nastyayarotskas/bankapp-notification-service:latest
-                    docker push ghcr.io/nastyayarotskas/bankapp-transfer-service:latest
+                    docker push ${DOCKER_REGISTRY}/bankapp-accounts-service:latest
+                    docker push ${DOCKER_REGISTRY}/bankapp-blocker-service:latest
+                    docker push ${DOCKER_REGISTRY}/bankapp-cash-service:latest
+                    docker push ${DOCKER_REGISTRY}/bankapp-exchange-generator-service:latest
+                    docker push ${DOCKER_REGISTRY}/bankapp-exchange-service:latest
+                    docker push ${DOCKER_REGISTRY}/bankapp-front-ui:latest
+                    docker push ${DOCKER_REGISTRY}/bankapp-notification-service:latest
+                    docker push ${DOCKER_REGISTRY}/bankapp-transfer-service:latest
                     """
                 }
             }
