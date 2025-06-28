@@ -12,44 +12,44 @@ pipeline {
     }
 
     stages {
-//         stage('Build & Unit Tests') {
-//             steps {
-//                sh 'mvn clean package -DskipTests'
-//             }
-//         }
-//
-//         stage('Build Docker Images') {
-//             steps {
-//                 sh """
-//                 docker build -t ghcr.io/nastyayarotskas/bankapp-accounts-service:latest accounts-service
-//                 docker build -t ghcr.io/nastyayarotskas/bankapp-blocker-service:latest blocker-service
-//                 docker build -t ghcr.io/nastyayarotskas/bankapp-cash-service:latest cash-service
-//                 docker build -t ghcr.io/nastyayarotskas/bankapp-exchange-generator-service:latest exchange-generator-service
-//                 docker build -t ghcr.io/nastyayarotskas/bankapp-exchange-service:latest exchange-service
-//                 docker build -t ghcr.io/nastyayarotskas/bankapp-front-ui:latest front-ui
-//                 docker build -t ghcr.io/nastyayarotskas/bankapp-notification-service:latest notification-service
-//                 docker build -t ghcr.io/nastyayarotskas/bankapp-transfer-service:latest transfer-service
-//                 """
-//             }
-//         }
+        stage('Build & Unit Tests') {
+            steps {
+               sh 'mvn clean package -DskipTests'
+            }
+        }
 
-//         stage('Push Docker Images') {
-//             steps {
-//                 withCredentials([string(credentialsId: 'GHCR_TOKEN', variable: 'GHCR_TOKEN')]) {
-//                     sh """
-//                     echo \$GHCR_TOKEN | docker login ghcr.io -u ${GITHUB_USERNAME} --password-stdin
-//                     docker push ghcr.io/nastyayarotskas/bankapp-accounts-service:latest
-//                     docker push ghcr.io/nastyayarotskas/bankapp-blocker-service:latest
-//                     docker push ghcr.io/nastyayarotskas/bankapp-cash-service:latest
-//                     docker push ghcr.io/nastyayarotskas/bankapp-exchange-generator-service:latest
-//                     docker push ghcr.io/nastyayarotskas/bankapp-exchange-service:latest
-//                     docker push ghcr.io/nastyayarotskas/bankapp-front-ui:latest
-//                     docker push ghcr.io/nastyayarotskas/bankapp-notification-service:latest
-//                     docker push ghcr.io/nastyayarotskas/bankapp-transfer-service:latest
-//                     """
-//                 }
-//             }
-//         }
+        stage('Build Docker Images') {
+            steps {
+                sh """
+                docker build -t ghcr.io/nastyayarotskas/bankapp-accounts-service:latest accounts-service
+                docker build -t ghcr.io/nastyayarotskas/bankapp-blocker-service:latest blocker-service
+                docker build -t ghcr.io/nastyayarotskas/bankapp-cash-service:latest cash-service
+                docker build -t ghcr.io/nastyayarotskas/bankapp-exchange-generator-service:latest exchange-generator-service
+                docker build -t ghcr.io/nastyayarotskas/bankapp-exchange-service:latest exchange-service
+                docker build -t ghcr.io/nastyayarotskas/bankapp-front-ui:latest front-ui
+                docker build -t ghcr.io/nastyayarotskas/bankapp-notification-service:latest notification-service
+                docker build -t ghcr.io/nastyayarotskas/bankapp-transfer-service:latest transfer-service
+                """
+            }
+        }
+
+        stage('Push Docker Images') {
+            steps {
+                withCredentials([string(credentialsId: 'GHCR_TOKEN', variable: 'GHCR_TOKEN')]) {
+                    sh """
+                    echo \$GHCR_TOKEN | docker login ghcr.io -u ${GITHUB_USERNAME} --password-stdin
+                    docker push ghcr.io/nastyayarotskas/bankapp-accounts-service:latest
+                    docker push ghcr.io/nastyayarotskas/bankapp-blocker-service:latest
+                    docker push ghcr.io/nastyayarotskas/bankapp-cash-service:latest
+                    docker push ghcr.io/nastyayarotskas/bankapp-exchange-generator-service:latest
+                    docker push ghcr.io/nastyayarotskas/bankapp-exchange-service:latest
+                    docker push ghcr.io/nastyayarotskas/bankapp-front-ui:latest
+                    docker push ghcr.io/nastyayarotskas/bankapp-notification-service:latest
+                    docker push ghcr.io/nastyayarotskas/bankapp-transfer-service:latest
+                    """
+                }
+            }
+        }
 
         stage('Test Helm Chart') {
                     steps {
