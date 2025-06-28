@@ -1,4 +1,7 @@
 dependencies:
+- name: keycloak
+  repository: file://./charts/keycloak
+  version: 0.1.0
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 14.2.3
@@ -26,5 +29,5 @@ dependencies:
 - name: transfer-service
   repository: file://./charts/transfer-service
   version: 0.1.0
-digest: sha256:f007eaf55da26fb3fec8cd9e95afce9c2a64e42d3adf6cdb5f16998cd7f6e552
-generated: "2025-06-21T14:55:13.941521+03:00"
+digest: sha256:e8c46fdccaf4d45a11675cc6a7552220bb23874ca702ee3a332df8ff4935d22c
+generated: "2025-06-28T13:27:22.629456+03:00"

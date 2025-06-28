@@ -45,7 +45,7 @@ cd .deployment
 helm dependency update .
 ```
 
-3. Установить keycloak
+3. Установить keycloak и сдлеать port-forward на 8080 чтобы установить скоупы и клиентов
 ```bush
 kubectl apply -f keycloak-deployment.yaml
 minikube service keycloak --url
@@ -61,6 +61,7 @@ sh upload-clients-to-keycloak.sh
 
 5. Задеплоить сервисы с помощью helm чартов
 ```bush
+cd .deployment
 # for install
 helm install bankapp .
 # for update
