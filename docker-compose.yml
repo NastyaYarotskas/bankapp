@@ -108,18 +108,6 @@ services:
     depends_on:
       - keycloak-secret-loader
 
-  gateway-service:
-    container_name: gateway-service
-    build:
-      context: ./gateway-service
-      dockerfile: Dockerfile
-    environment:
-      - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
-    ports:
-      - "9006:9006"
-    depends_on:
-      - keycloak-secret-loader
-
   notification-service:
     container_name: notification-service
     build:
