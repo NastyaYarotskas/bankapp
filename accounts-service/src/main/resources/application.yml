@@ -26,7 +26,7 @@ spring:
     init:
       mode: always
   kafka:
-    bootstrap-servers: 'localhost:29092'
+    bootstrap-servers: ${KAFKA_URL:localhost:29092}
     admin:
       client-id: accounts-service
       fail-fast: true

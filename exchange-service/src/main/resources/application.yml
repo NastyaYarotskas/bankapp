@@ -15,7 +15,7 @@ spring:
   application:
     name: exchange-service
   kafka:
-    bootstrap-servers: 'localhost:29092'
+    bootstrap-servers: ${KAFKA_URL:localhost:29092}
     admin:
       client-id: exchange-service
       fail-fast: true

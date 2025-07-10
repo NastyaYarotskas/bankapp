@@ -22,7 +22,7 @@ spring:
   application:
     name: cash-service
   kafka:
-    bootstrap-servers: 'localhost:29092'
+    bootstrap-servers: ${KAFKA_URL:localhost:29092}
     admin:
       client-id: cash-service
       fail-fast: true

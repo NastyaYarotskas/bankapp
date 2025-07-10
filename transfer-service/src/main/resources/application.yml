@@ -25,7 +25,7 @@ spring:
   application:
     name: transfer-service
   kafka:
-    bootstrap-servers: 'localhost:29092'
+    bootstrap-servers: ${KAFKA_URL:localhost:29092}
     admin:
       client-id: transfer-service
       fail-fast: true
