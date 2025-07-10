@@ -1,14 +1,17 @@
 package ru.yandex.practicum.exchange.service.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.exchange.service.model.Currency;
+import ru.yandex.practicum.model.Currency;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/currencies")
@@ -46,5 +49,13 @@ public class CurrencyController {
         return getCurrency(code)
                 .doOnNext(currency -> currency.setValue(updatedCurrency.getValue()))
                 .thenReturn(updatedCurrency);
+    }
+
+    @KafkaListener(topics = "currency-rates", groupId = "exchange-service")
+    public void listen(@Payload Currency currency) {
+        Optional<Currency> any = currencies.stream()
+                .filter(c -> c.getName().equalsIgnoreCase(currency.getName()))
+                .findAny();
+        any.ifPresent(currency1 -> currency1.setValue(currency.getValue()));
     }
 }

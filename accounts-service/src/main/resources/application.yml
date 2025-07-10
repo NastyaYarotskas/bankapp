@@ -1,10 +1,6 @@
 server:
   port: 9001
 
-notification:
-  service:
-    url: ${NOTIFICATION_SERVICE_URL:http://localhost:9009}
-
 management:
   endpoints:
     web:
@@ -29,6 +25,14 @@ spring:
   sql:
     init:
       mode: always
+  kafka:
+    bootstrap-servers: 'localhost:29092'
+    admin:
+      client-id: accounts-service
+      fail-fast: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   security:
     oauth2:
       resourceserver:

@@ -31,17 +31,6 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient.Builder notificationServiceWebClientBuilder(@Value("${notification.service.url}") String baseUrl) {
-        return WebClient.builder()
-                .baseUrl(baseUrl);
-    }
-
-    @Bean
-    public WebClient notificationServiceWebClient(WebClient.Builder notificationServiceWebClientBuilder) {
-        return notificationServiceWebClientBuilder.build();
-    }
-
-    @Bean
     public WebClient.Builder exchangeServiceWebClientBuilder(@Value("${exchange.service.url}") String baseUrl) {
         return WebClient.builder()
                 .baseUrl(baseUrl);

@@ -7,9 +7,6 @@ account:
 blocker:
   service:
     url: ${BLOCKER_SERVICE_URL:http://localhost:9008}
-notification:
-  service:
-    url: ${NOTIFICATION_SERVICE_URL:http://localhost:9009}
 
 management:
   endpoints:
@@ -24,6 +21,14 @@ management:
 spring:
   application:
     name: cash-service
+  kafka:
+    bootstrap-servers: 'localhost:29092'
+    admin:
+      client-id: cash-service
+      fail-fast: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   security:
     oauth2:
       resourceserver:

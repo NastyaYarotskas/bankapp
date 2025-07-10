@@ -6,6 +6,13 @@ blocker:
   service:
     url: http://localhost:9002
 
-notification:
-  service:
-    url: http://localhost:9001
+spring:
+  application:
+    name: cash-service
+  kafka:
+    admin:
+      client-id: cash-service
+      fail-fast: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

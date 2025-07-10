@@ -7,9 +7,9 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
+import ru.yandex.practicum.model.NotificationRequest;
 import ru.yandex.practicum.transfer.service.client.*;
 import ru.yandex.practicum.transfer.service.request.OperationRequest;
-import ru.yandex.practicum.transfer.service.request.NotificationRequest;
 import ru.yandex.practicum.transfer.service.request.TransferRequest;
 import ru.yandex.practicum.transfer.service.model.Account;
 import ru.yandex.practicum.transfer.service.model.Currency;
@@ -28,16 +28,16 @@ public class TransferService {
     private final AccountsServiceClient accountsServiceClient;
     private final ExchangeServiceClient exchangeServiceClient;
     private final BlockerServiceClient blockerServiceClient;
-    private final NotificationServiceClient notificationServiceClient;
+    private final NotificationProducer notificationProducer;
 
     public TransferService(AccountsServiceClient accountsServiceClient,
                          ExchangeServiceClient exchangeServiceClient,
                          BlockerServiceClient blockerServiceClient,
-                         NotificationServiceClient notificationServiceClient) {
+                           NotificationProducer notificationProducer) {
         this.accountsServiceClient = accountsServiceClient;
         this.exchangeServiceClient = exchangeServiceClient;
         this.blockerServiceClient = blockerServiceClient;
-        this.notificationServiceClient = notificationServiceClient;
+        this.notificationProducer = notificationProducer;
     }
 
     public Mono<Void> transfer(TransferRequest request) {
@@ -72,8 +72,7 @@ public class TransferService {
     }
 
     private void sendTransferNotification(String login, String message) {
-        notificationServiceClient.sendNotification(new NotificationRequest(login, message))
-                .subscribe(null, e -> log.error("Failed to send notification", e));
+        notificationProducer.sendNotification(new NotificationRequest(login, message));
     }
 
     private void sendSuccessNotification(TransferRequest request) {

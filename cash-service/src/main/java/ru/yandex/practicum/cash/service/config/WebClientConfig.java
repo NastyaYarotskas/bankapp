@@ -20,7 +20,6 @@ public class WebClientConfig {
     }
 
     @Bean
-//    @LoadBalanced
     public WebClient.Builder blockerServiceWebClientBuilder(@Value("${blocker.service.url}") String baseUrl) {
         return WebClient.builder()
                 .baseUrl(baseUrl);
@@ -29,16 +28,5 @@ public class WebClientConfig {
     @Bean
     public WebClient blockerServiceWebClient(WebClient.Builder blockerServiceWebClientBuilder) {
         return blockerServiceWebClientBuilder.build();
-    }
-
-    @Bean
-    public WebClient.Builder notificationServiceWebClientBuilder(@Value("${notification.service.url}") String baseUrl) {
-        return WebClient.builder()
-                .baseUrl(baseUrl);
-    }
-
-    @Bean
-    public WebClient notificationServiceWebClient(WebClient.Builder notificationServiceWebClientBuilder) {
-        return notificationServiceWebClientBuilder.build();
     }
 }

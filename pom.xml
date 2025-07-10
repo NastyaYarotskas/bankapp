@@ -25,6 +25,7 @@
         <module>exchange-generator-service</module>
         <module>blocker-service</module>
         <module>notification-service</module>
+        <module>shared-models</module>
     </modules>
 
     <properties>

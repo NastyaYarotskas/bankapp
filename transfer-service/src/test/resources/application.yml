@@ -6,10 +6,17 @@ blocker:
   service:
     url: http://localhost:9002
 
-notification:
-  service:
-    url: http://localhost:9001
-
 exchange:
   service:
     url: http://localhost:9004
+
+spring:
+  application:
+    name: transfer-service
+  kafka:
+    admin:
+      client-id: transfer-service
+      fail-fast: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

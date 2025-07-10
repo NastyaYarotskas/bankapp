@@ -1,26 +1,37 @@
 package ru.yandex.practicum.exchange.service.controller;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import ru.yandex.practicum.exchange.service.config.TestOAuth2ClientConfig;
-import ru.yandex.practicum.exchange.service.model.Currency;
+import ru.yandex.practicum.model.Currency;
 
+import java.util.concurrent.TimeUnit;
+
+import static org.awaitility.Awaitility.await;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@EmbeddedKafka(
+        topics = {"currency-rates"}
+)
 @Import(TestOAuth2ClientConfig.class)
 public class CurrencyControllerTest {
 
     @Autowired
     WebTestClient webTestClient;
+    @Autowired
+    private KafkaTemplate<String, Currency> kafkaTemplate;
 
     @Test
     void getAllCurrencies_currenciesArePresent_shouldReturnAllCurrencies() {
@@ -113,6 +124,28 @@ public class CurrencyControllerTest {
                 .bodyValue(updatedCurrency)
                 .exchange()
                 .expectStatus().isBadRequest();
+    }
+
+    @SneakyThrows
+    @Test
+    void updateCurrency_fromKafka_shouldReadMessageAndUpdateCurrency() {
+        Currency updatedCurrency = new Currency("USD", "Dollars", 1.5);
+
+        kafkaTemplate.send("currency-rates", updatedCurrency).get();
+
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() ->
+                        webTestClient.mutateWith(getJwtMutator())
+                                .get()
+                                .uri("/api/currencies/usd")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .exchange()
+                                .expectStatus().isOk()
+                                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                                .expectBody(Currency.class)
+                                .isEqualTo(updatedCurrency)
+                );
     }
 
     private static SecurityMockServerConfigurers.JwtMutator getJwtMutator() {

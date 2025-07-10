@@ -10,16 +10,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
+import ru.yandex.practicum.accounts.service.entity.AccountEntity;
 import ru.yandex.practicum.accounts.service.entity.UserEntity;
 import ru.yandex.practicum.accounts.service.model.Account;
-import ru.yandex.practicum.accounts.service.entity.AccountEntity;
+import ru.yandex.practicum.accounts.service.model.CurrencyEnum;
 import ru.yandex.practicum.accounts.service.model.User;
+import ru.yandex.practicum.accounts.service.notification.NotificationProducer;
 import ru.yandex.practicum.accounts.service.repository.UserRepository;
 import ru.yandex.practicum.accounts.service.request.EditPasswordRequest;
 import ru.yandex.practicum.accounts.service.request.UserCreateRequest;
-import ru.yandex.practicum.accounts.service.model.CurrencyEnum;
-import ru.yandex.practicum.accounts.service.notification.NotificationRequest;
-import ru.yandex.practicum.accounts.service.notification.NotificationServiceClient;
+import ru.yandex.practicum.model.NotificationRequest;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static ru.yandex.practicum.accounts.service.notification.NotificationMessages.*;
 import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.*;
+import static ru.yandex.practicum.accounts.service.notification.NotificationMessages.*;
 import static ru.yandex.practicum.accounts.service.service.UserValidator.*;
 
 @Slf4j
@@ -40,7 +40,7 @@ public class UserService {
 
     private final AccountService accountService;
     private final UserRepository userRepository;
-    private final NotificationServiceClient notificationServiceClient;
+    private final NotificationProducer notificationProducer;
 
     public Mono<User> createUser(UserCreateRequest request) {
         return validateRequest(request)
@@ -126,7 +126,8 @@ public class UserService {
     }
 
     private Mono<Void> sendNotification(String login, String message) {
-        return notificationServiceClient.sendNotification(new NotificationRequest(login, message));
+        notificationProducer.sendNotification(new NotificationRequest(login, message));
+        return Mono.empty();
     }
 
     private Mono<UserEntity> findAndUpdateUser(String login, EditPasswordRequest request) {
@@ -167,12 +168,10 @@ public class UserService {
     private Mono<Void> sendAccountUpdateNotification(String login, int accountsCount) {
         String notificationMessage = String.format(ACCOUNT_UPDATE_MESSAGE_TEMPLATE, accountsCount);
 
-        return notificationServiceClient
-                .sendNotification(new NotificationRequest(login, notificationMessage))
-                .onErrorResume(error -> {
-                    log.error("Failed to send update notification to user {}", login, error);
-                    return Mono.empty();
-                });
+        notificationProducer
+                .sendNotification(new NotificationRequest(login, notificationMessage));
+
+        return Mono.empty();
     }
 
     private Mono<UserEntity> findAndUpdateUserData(String login, User user) {

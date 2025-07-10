@@ -2,7 +2,12 @@ spring:
   task:
     scheduling:
       enabled: false
-
-exchange:
-  service:
-    url: http://localhost:9001
+  application:
+    name: exchange-generator-service
+  kafka:
+    admin:
+      client-id: exchange-generator-service
+      fail-fast: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
