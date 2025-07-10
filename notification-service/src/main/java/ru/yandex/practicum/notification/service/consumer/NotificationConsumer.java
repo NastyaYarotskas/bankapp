@@ -1,12 +1,15 @@
 package ru.yandex.practicum.notification.service.consumer;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.model.NotificationRequest;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationConsumer {
@@ -14,7 +17,12 @@ public class NotificationConsumer {
     private final SimpMessagingTemplate messagingTemplate;
 
     @KafkaListener(topics = "notifications", groupId = "notification-service")
-    public void listen(@Payload NotificationRequest request) {
-        messagingTemplate.convertAndSend("/topic/notifications", request);
+    public void listen(@Payload NotificationRequest request, Acknowledgment ack) {
+        try {
+            messagingTemplate.convertAndSend("/topic/notifications", request);
+            ack.acknowledge();
+        } catch (Exception e) {
+            log.error("Error reading notification: {}", e.getMessage());
+        }
     }
 }

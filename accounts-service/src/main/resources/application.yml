@@ -31,6 +31,8 @@ spring:
       client-id: accounts-service
       fail-fast: true
     producer:
+      acks: all
+      retries: 3
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   security:
