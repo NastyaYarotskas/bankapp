@@ -9,6 +9,7 @@ import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRun
 import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -32,10 +33,12 @@ import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenTy
 @AutoConfigureStubRunner(
         ids = {
                 "ru.yandex.practicum:blocker-service:+:stubs:9002",
-                "ru.yandex.practicum:notification-service:+:stubs:9001",
                 "ru.yandex.practicum:accounts-service:+:stubs:9003"
         },
         stubsMode = StubRunnerProperties.StubsMode.LOCAL
+)
+@EmbeddedKafka(
+        topics = {"notifications"}
 )
 @Import({TestWebClientConfig.class, TestOAuth2ClientConfig.class})
 class CashServiceTest {

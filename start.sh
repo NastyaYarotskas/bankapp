@@ -8,14 +8,6 @@ while ! curl -s http://localhost:8080; do
   sleep 5
 done
 
-docker compose up -d keycloak-secret-loader --build
-
-# Ждем, пока секрет не будет доступен
-while [ -z "$(curl -s 'http://localhost:8500/v1/kv/secrets/FRONT_UI_SERVICE/client-secret?raw')" ]; do
-  echo "Ожидание создания секрета..."
-  sleep 5
-done
-
 # Настраиваем клиента и получаем секрет
 # shellcheck disable=SC2155
 export FRONT_UI_SERVICE_CLIENT_SECRET=$(curl -s 'http://localhost:8500/v1/kv/secrets/FRONT_UI_SERVICE/client-secret?raw')

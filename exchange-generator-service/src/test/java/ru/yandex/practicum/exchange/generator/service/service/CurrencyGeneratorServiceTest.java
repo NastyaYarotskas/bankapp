@@ -3,18 +3,15 @@ package ru.yandex.practicum.exchange.generator.service.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
-import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.context.annotation.Import;
-import ru.yandex.practicum.exchange.generator.service.config.TestWebClientConfig;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import ru.yandex.practicum.exchange.generator.service.config.TestOAuth2ClientConfig;
 
 @SpringBootTest
-@AutoConfigureStubRunner(
-        ids = "ru.yandex.practicum:exchange-service:+:stubs:9001",
-        stubsMode = StubRunnerProperties.StubsMode.LOCAL
+@EmbeddedKafka(
+        topics = {"currency-rates"}
 )
-@Import({TestWebClientConfig.class, TestOAuth2ClientConfig.class})
+@Import({TestOAuth2ClientConfig.class})
 public class CurrencyGeneratorServiceTest {
 
     @Autowired

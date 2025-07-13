@@ -11,15 +11,6 @@ public class TestWebClientConfig {
 
     @Bean
     @Primary
-    @Qualifier("notificationServiceWebClient")
-    public WebClient testNotificationServiceWebClient() {
-        return WebClient.builder()
-                .baseUrl("http://localhost:9001")
-                .build();
-    }
-
-    @Bean
-    @Primary
     @Qualifier("blockerServiceWebClient")
     public WebClient testBlockerServiceWebClient() {
         return WebClient.builder()

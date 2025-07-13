@@ -14,6 +14,19 @@ management:
 spring:
   application:
     name: exchange-service
+  kafka:
+    bootstrap-servers: ${KAFKA_URL:localhost:29092}
+    admin:
+      client-id: exchange-service
+      fail-fast: true
+    consumer:
+      group-id: exchange-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-commit: true
+      enable-auto-commit: true
+      properties:
+        spring.json.trusted.packages: '*'
   security:
     oauth2:
       resourceserver:

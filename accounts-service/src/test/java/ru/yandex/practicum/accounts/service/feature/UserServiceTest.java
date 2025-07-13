@@ -1,12 +1,18 @@
 package ru.yandex.practicum.accounts.service.feature;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
-import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.context.annotation.Import;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -20,29 +26,25 @@ import ru.yandex.practicum.accounts.service.model.Account;
 import ru.yandex.practicum.accounts.service.model.Currency;
 import ru.yandex.practicum.accounts.service.model.CurrencyEnum;
 import ru.yandex.practicum.accounts.service.model.User;
-import ru.yandex.practicum.accounts.service.notification.NotificationRequest;
 import ru.yandex.practicum.accounts.service.repository.UserRepository;
 import ru.yandex.practicum.accounts.service.request.EditPasswordRequest;
 import ru.yandex.practicum.accounts.service.request.UserCreateRequest;
 import ru.yandex.practicum.accounts.service.service.UserService;
+import ru.yandex.practicum.model.NotificationRequest;
 
-import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER;
 import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.*;
+import static ru.yandex.practicum.accounts.service.notification.NotificationMessages.SUCCESS_PASSWORD_UPDATE_MESSAGE;
 
-@AutoConfigureStubRunner(
-        ids = "ru.yandex.practicum:notification-service:+:stubs:8888",
-        stubsMode = StubRunnerProperties.StubsMode.LOCAL
-)
 @Import({TestSecurityConfig.class})
 public class UserServiceTest extends BaseTest {
 
@@ -52,6 +54,8 @@ public class UserServiceTest extends BaseTest {
     private UserRepository userRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private EmbeddedKafkaBroker embeddedKafka;
 
     @BeforeEach
     void setUp() {
@@ -300,6 +304,11 @@ public class UserServiceTest extends BaseTest {
                 .confirmPassword(newPassword)
                 .build();
 
+        KafkaConsumer<String, NotificationRequest> consumer = createConsumer();
+
+        ConsumerRecords<String, NotificationRequest> dummyRecords = consumer.poll(Duration.ofMillis(100));
+        consumer.seekToEnd(consumer.assignment());
+
         StepVerifier.create(userService.createUser(createRequest)
                         .then(userService.updateUserPassword(login, editRequest)))
                 .assertNext(updatedUser -> {
@@ -313,6 +322,13 @@ public class UserServiceTest extends BaseTest {
                         Assertions.assertThat(userEntity.getPassword()).isEqualTo(newPassword)
                 )
                 .verifyComplete();
+
+        ConsumerRecord<String, NotificationRequest> record =
+                KafkaTestUtils.getSingleRecord(consumer, "notifications", Duration.ofSeconds(5));
+
+        Assertions.assertThat(record).isNotNull();
+        Assertions.assertThat(record.value().getLogin()).isEqualTo(login);
+        Assertions.assertThat(record.value().getMessage()).isEqualTo(SUCCESS_PASSWORD_UPDATE_MESSAGE);
     }
 
     @Test
@@ -321,9 +337,6 @@ public class UserServiceTest extends BaseTest {
         String originalPassword = "original_password";
         String newPassword = "new_password";
         String wrongConfirmPassword = "wrong_password";
-        String expectedErrorMessage = "Не удалось обновить пароль. Причина: 400 BAD_REQUEST \"Пароль и подтверждение пароля не совпадают\"";
-
-        NotificationRequest expectedRequest = new NotificationRequest(login, expectedErrorMessage);
 
         UserCreateRequest createRequest = UserCreateRequest.builder()
                 .login(login)
@@ -356,7 +369,7 @@ public class UserServiceTest extends BaseTest {
     }
 
     @Test
-    void updateUserAccounts_validData_shouldUpdateUserAndAccounts() throws IOException {
+    void updateUserAccounts_validData_shouldUpdateUserAndAccounts() {
         String login = "test_user";
         String name = "Test User";
         LocalDate birthDate = LocalDate.of(1990, 1, 1);
@@ -499,5 +512,17 @@ public class UserServiceTest extends BaseTest {
                             .contains(INVALID_ACCOUNT_LIST_ERROR_MSG);
                 })
                 .verify();
+    }
+
+    private KafkaConsumer<String, NotificationRequest> createConsumer() {
+        Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("testGroup" + UUID.randomUUID(), "true", embeddedKafka);
+        consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        consumerProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        KafkaConsumer<String, NotificationRequest> consumer = new KafkaConsumer<>(consumerProps);
+        consumer.subscribe(Collections.singleton("notifications"));
+        return consumer;
     }
 }

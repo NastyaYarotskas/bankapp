@@ -30,7 +30,7 @@ environment:
   KEYCLOAK_ISSUE_URL: http://keycloak:8080/realms/master
   ACCOUNT_SERVICE_URL: http://{{ .Release.Name }}-accounts-service:9001
   BLOCKER_SERVICE_URL: http://{{ .Release.Name }}-blocker-service:9008
-  NOTIFICATION_SERVICE_URL: http://{{ .Release.Name }}-notification-service:9009
+  KAFKA_URL: kafka.kafka.svc.cluster.local:9092
 
 resources: {}
 

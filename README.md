@@ -54,12 +54,16 @@ cd .deployment
 helm dependency update .
 ```
 
-4. Установить keycloak
+4. Установить keycloak и кафку
 ```bush
 cd ..
 kubectl apply -f keycloak-deployment.yaml
 ## для удаления
 kubectl delete -f keycloak-deployment.yaml
+
+kubectl apply -f kafka-deployment.yaml
+## для удаления
+kubectl delete -f kafka-deployment.yaml
 ```
 
 5. Добавьте записи в `/etc/hosts`
@@ -186,3 +190,15 @@ Jenkins будет доступен по адресу: [http://localhost:8080](h
    - сборку Docker-образов
    - публикацию образов в GHCR
    - деплой в Kubernetes в два namespace: `test` и `prod`
+
+### Как запускать Kafka
+
+В докер `docker run -p 9092:9092 apache/kafka:4.0.0`
+
+Запуск Kafka в Kubernetes
+
+```bush
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update 
+helm install kafka bitnami/kafka
+```

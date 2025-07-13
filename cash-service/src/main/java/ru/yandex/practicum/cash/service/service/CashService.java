@@ -8,12 +8,11 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.cash.service.client.AccountsServiceClient;
 import ru.yandex.practicum.cash.service.client.BlockerServiceClient;
-import ru.yandex.practicum.cash.service.client.NotificationServiceClient;
 import ru.yandex.practicum.cash.service.request.CashChangeRequest;
-import ru.yandex.practicum.cash.service.request.NotificationRequest;
 import ru.yandex.practicum.cash.service.request.OperationRequest;
 import ru.yandex.practicum.cash.service.model.Account;
 import ru.yandex.practicum.cash.service.model.User;
+import ru.yandex.practicum.model.NotificationRequest;
 
 @Slf4j
 @Service
@@ -29,7 +28,7 @@ public class CashService {
     @Autowired
     private BlockerServiceClient blockerServiceClient;
     @Autowired
-    private NotificationServiceClient notificationServiceClient;
+    private NotificationProducer notificationProducer;
 
     public Mono<Void> processAccountTransaction(String login, CashChangeRequest request) {
         return validateRequest(request)
@@ -45,33 +44,21 @@ public class CashService {
                                     return processAccountOperation(login, validRequest);
                                 }))
                 .flatMap(result -> {
-                    sendSuccessNotification(login, "Операция прошла успешно");
+                    sendNotification(login, "Операция прошла успешно");
                     return Mono.just(result);
                 })
                 .onErrorResume(error -> {
                     String errorMessage = error instanceof ResponseStatusException ?
                             ((ResponseStatusException) error).getReason() :
                             "Операция была отменена: " + error.getMessage();
-                    sendErrorNotification(login, errorMessage);
+                    sendNotification(login, errorMessage);
                     return Mono.error(error);
                 })
                 .then();
     }
 
-    private void sendSuccessNotification(String login, String message) {
-        notificationServiceClient.sendNotification(new NotificationRequest(login, message))
-                .subscribe(
-                        null,
-                        e -> log.error("Failed to send success notification", e)
-                );
-    }
-
-    private void sendErrorNotification(String login, String message) {
-        notificationServiceClient.sendNotification(new NotificationRequest(login, message))
-                .subscribe(
-                        null,
-                        e -> log.error("Failed to send error notification", e)
-                );
+    private void sendNotification(String login, String message) {
+        notificationProducer.sendNotification(new NotificationRequest(login, message));
     }
 
     private Mono<CashChangeRequest> validateRequest(CashChangeRequest request) {

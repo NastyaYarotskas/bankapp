@@ -5,8 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
-import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
@@ -29,10 +27,6 @@ import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenTy
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-@AutoConfigureStubRunner(
-        ids = "ru.yandex.practicum:notification-service:+:stubs:8888",
-        stubsMode = StubRunnerProperties.StubsMode.LOCAL
-)
 @Import({TestSecurityConfig.class, OAuth2ClientTestConfig.class})
 public class UserContractTest extends BaseTest {
 
