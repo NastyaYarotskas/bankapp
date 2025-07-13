@@ -28,6 +28,7 @@ ingress:
 
 environment:
   KEYCLOAK_ISSUE_URL: http://keycloak:8080/realms/master
+  KAFKA_URL: kafka.kafka.svc.cluster.local:9092
 
 resources: {}
 

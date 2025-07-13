@@ -54,12 +54,16 @@ cd .deployment
 helm dependency update .
 ```
 
-4. Установить keycloak
+4. Установить keycloak и кафку
 ```bush
 cd ..
 kubectl apply -f keycloak-deployment.yaml
 ## для удаления
 kubectl delete -f keycloak-deployment.yaml
+
+kubectl apply -f kafka-deployment.yaml
+## для удаления
+kubectl delete -f kafka-deployment.yaml
 ```
 
 5. Добавьте записи в `/etc/hosts`

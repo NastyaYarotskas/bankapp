@@ -9,27 +9,6 @@ services:
     ports:
       - "5430:5432"
 
-  keycloak-secret-loader:
-    build:
-      context: ./.docker/keycloak-config-loader
-      dockerfile: Dockerfile
-    container_name: keycloak-secret-loader
-    environment:
-      - KEYCLOAK_URL=http://keycloak:8080
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-    volumes:
-      - ./.docker:/docker
-    command: >
-      sh -c "
-      echo 'Ожидание готовности Keycloak...' &&
-      while ! curl -s http://keycloak:8080; do sleep 5; done &&
-      echo 'Keycloak готов - начинаем получение секретов' &&
-      chmod +x /app/scripts/get-secrets.sh &&
-      sh /app/scripts/get-secrets.sh"
-    depends_on:
-      - keycloak
-
   accounts-service:
     container_name: accounts-service
     build:
@@ -43,7 +22,6 @@ services:
       - "9001:9001"
     depends_on:
       - accounts-service-db
-      - keycloak-secret-loader
 
   blocker-service:
     container_name: blocker-service
@@ -54,8 +32,6 @@ services:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
     ports:
       - "9008:9008"
-    depends_on:
-      - keycloak-secret-loader
 
   cash-service:
     container_name: cash-service
@@ -67,8 +43,6 @@ services:
       - CLIENT_SECRET=${CASH_SERVICE_CLIENT_SECRET}
     ports:
       - "9002:9002"
-    depends_on:
-      - keycloak-secret-loader
 
   exchange-generator-service:
     container_name: exchange-generator-service
@@ -80,8 +54,6 @@ services:
       - CLIENT_SECRET=${EXCHANGE_GENERATOR_SERVICE_CLIENT_SECRET}
     ports:
       - "9007:9007"
-    depends_on:
-      - keycloak-secret-loader
 
   exchange-service:
     container_name: exchange-service
@@ -92,8 +64,6 @@ services:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
     ports:
       - "9003:9003"
-    depends_on:
-      - keycloak-secret-loader
 
   front-ui:
     container_name: front-ui
@@ -105,8 +75,6 @@ services:
       - CLIENT_SECRET=${FRONT_UI_SERVICE_CLIENT_SECRET}
     ports:
       - "9000:9000"
-    depends_on:
-      - keycloak-secret-loader
 
   notification-service:
     container_name: notification-service
@@ -117,8 +85,6 @@ services:
       - KEYCLOAK_ISSUE_URL=http://keycloak:8080/realms/master
     ports:
       - "9009:9009"
-    depends_on:
-      - keycloak-secret-loader
 
   transfer-service:
     container_name: transfer-service
@@ -130,8 +96,6 @@ services:
       - CLIENT_SECRET=${TRANSFER_SERVICE_CLIENT_SECRET}
     ports:
       - "9004:9004"
-    depends_on:
-      - keycloak-secret-loader
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest

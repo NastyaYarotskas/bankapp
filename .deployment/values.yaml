@@ -1,6 +1,4 @@
-# .deployment/values.yaml
 global:
-#  domain: bank.local
   keycloak:
     url: http://keycloak:8080
     realm: master

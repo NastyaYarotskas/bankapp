@@ -3,8 +3,10 @@ package ru.yandex.practicum.exchange.service.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
@@ -55,15 +57,11 @@ public class CurrencyController {
     }
 
     @KafkaListener(topics = "currency-rates", groupId = "exchange-service")
-    public void listen(@Payload Currency currency, Acknowledgment ack) {
-        try {
-            Optional<Currency> any = currencies.stream()
-                    .filter(c -> c.getName().equalsIgnoreCase(currency.getName()))
-                    .findAny();
-            any.ifPresent(currency1 -> currency1.setValue(currency.getValue()));
-            ack.acknowledge();
-        } catch (Exception e) {
-            log.error("Error reading currency rate: {}", e.getMessage());
-        }
+    public void listen(@Payload Currency currency) {
+        log.info("Got currency: {}", currency);
+        Optional<Currency> any = currencies.stream()
+                .filter(c -> c.getName().equalsIgnoreCase(currency.getName()))
+                .findAny();
+        any.ifPresent(currency1 -> currency1.setValue(currency.getValue()));
     }
 }

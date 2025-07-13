@@ -17,12 +17,8 @@ public class NotificationConsumer {
     private final SimpMessagingTemplate messagingTemplate;
 
     @KafkaListener(topics = "notifications", groupId = "notification-service")
-    public void listen(@Payload NotificationRequest request, Acknowledgment ack) {
-        try {
-            messagingTemplate.convertAndSend("/topic/notifications", request);
-            ack.acknowledge();
-        } catch (Exception e) {
-            log.error("Error reading notification: {}", e.getMessage());
-        }
+    public void listen(@Payload NotificationRequest request) {
+        log.info("Got notification: {}", request);
+        messagingTemplate.convertAndSend("/topic/notifications", request);
     }
 }
