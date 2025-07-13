@@ -40,32 +40,32 @@ data:
   values.yaml: |
     replicaCount: 2
 
-listeners:
-  client:
-    protocol: PLAINTEXT
+    listeners:
+      client:
+        protocol: PLAINTEXT
+  
+    allowPlaintextListener: true
+  
+    externalAccess:
+      enabled: false
+  
+    zookeeper:
+      enabled: true
+      replicaCount: 1
+      persistence:
+        enabled: true
+        storageClass: "standard"
+        size: 5Gi
+  
+    auth:
+      enabled: false
+  
+    podAntiAffinityPreset: soft
 
-allowPlaintextListener: true
-
-externalAccess:
-  enabled: false
-
-zookeeper:
-  enabled: true
-  replicaCount: 1
-  persistence:
-    enabled: true
-    storageClass: "standard"
-    size: 5Gi
-
-auth:
-  enabled: false
-
-podAntiAffinityPreset: soft
-
-persistence:
-  enabled: true
-  storageClass: "standard"
-  size: 8Gi
+    persistence:
+      enabled: true
+      storageClass: "standard"
+      size: 8Gi
 
 ---
 apiVersion: batch/v1
