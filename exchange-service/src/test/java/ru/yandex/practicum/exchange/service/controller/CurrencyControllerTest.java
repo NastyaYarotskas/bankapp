@@ -48,7 +48,7 @@ public class CurrencyControllerTest {
     void getCurrency_whenCurrencyExists_shouldReturnCurrency() {
         webTestClient.mutateWith(getJwtMutator())
                 .get()
-                .uri("/api/currencies/usd")
+                .uri("/api/currencies/USD")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -86,7 +86,7 @@ public class CurrencyControllerTest {
 
         webTestClient.mutateWith(getJwtMutator())
                 .put()
-                .uri("/api/currencies/usd")
+                .uri("/api/currencies/USD")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updatedCurrency)
                 .exchange()
@@ -98,7 +98,7 @@ public class CurrencyControllerTest {
 
         webTestClient.mutateWith(getJwtMutator())
                 .put()
-                .uri("/api/currencies/usd")
+                .uri("/api/currencies/USD")
                 .bodyValue(updatedCurrency)
                 .exchange()
                 .expectStatus().isOk()
