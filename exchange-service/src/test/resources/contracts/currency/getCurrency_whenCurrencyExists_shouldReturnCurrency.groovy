@@ -7,7 +7,7 @@ Contract.make {
 
     request {
         method GET()
-        url "/api/currencies/usd"
+        url "/api/currencies/USD"
         headers {
             accept applicationJson()
         }
