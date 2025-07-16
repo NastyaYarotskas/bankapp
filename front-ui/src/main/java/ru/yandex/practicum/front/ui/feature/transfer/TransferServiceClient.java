@@ -1,6 +1,7 @@
 package ru.yandex.practicum.front.ui.feature.transfer;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -8,6 +9,7 @@ import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClient
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
 import reactor.core.publisher.Mono;
 
 @Component
@@ -17,8 +19,8 @@ public class TransferServiceClient {
     @Autowired
     private ReactiveOAuth2AuthorizedClientManager manager;
 
-    public TransferServiceClient(WebClient.Builder transferServiceWebClientBuilder) {
-        this.transferServiceWebClient = transferServiceWebClientBuilder.build();
+    public TransferServiceClient(WebClient.Builder webClientBuilder, @Value("${transfer.service.url}") String baseUrl) {
+        this.transferServiceWebClient = webClientBuilder.baseUrl(baseUrl).build();
     }
 
     public Mono<Void> transfer(String login, TransferRequest request) {
@@ -30,15 +32,14 @@ public class TransferServiceClient {
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                                 .bodyValue(request)
                                 .retrieve()
-                                .bodyToMono(Void.class)
-                );
+                                .bodyToMono(Void.class));
     }
 
     private Mono<String> retrieveToken() {
         return manager.authorize(OAuth2AuthorizeRequest
-                        .withClientRegistrationId("front-ui-client")
-                        .principal("system")
-                        .build())
+                .withClientRegistrationId("front-ui-client")
+                .principal("system")
+                .build())
                 .map(OAuth2AuthorizedClient::getAccessToken)
                 .map(OAuth2AccessToken::getTokenValue);
     }

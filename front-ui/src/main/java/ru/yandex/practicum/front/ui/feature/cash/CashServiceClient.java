@@ -1,6 +1,7 @@
 package ru.yandex.practicum.front.ui.feature.cash;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -17,8 +18,8 @@ public class CashServiceClient {
     @Autowired
     private ReactiveOAuth2AuthorizedClientManager manager;
 
-    public CashServiceClient(WebClient.Builder cashServiceWebClientBuilder) {
-        this.cashServiceWebClient = cashServiceWebClientBuilder.build();
+    public CashServiceClient(WebClient.Builder webClientBuilder, @Value("${cash.service.url}") String baseUrl) {
+        this.cashServiceWebClient = webClientBuilder.baseUrl(baseUrl).build();
     }
 
     public Mono<Void> processAccountTransaction(String login, CashChangeRequest request) {

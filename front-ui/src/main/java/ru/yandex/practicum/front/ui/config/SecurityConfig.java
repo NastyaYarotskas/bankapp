@@ -2,7 +2,6 @@ package ru.yandex.practicum.front.ui.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -15,6 +14,7 @@ import org.springframework.security.web.server.authentication.logout.DelegatingS
 import org.springframework.security.web.server.authentication.logout.SecurityContextServerLogoutHandler;
 import org.springframework.security.web.server.authentication.logout.ServerLogoutHandler;
 import org.springframework.security.web.server.authentication.logout.WebSessionServerLogoutHandler;
+
 import reactor.core.publisher.Mono;
 
 @Configuration
@@ -27,13 +27,11 @@ public class SecurityConfig {
         return http
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/", "/main", "/signup", "/login", "/api/rates", "/actuator/**").permitAll()
-                        .anyExchange().authenticated()
-                )
+                        .anyExchange().authenticated())
                 .formLogin(Customizer.withDefaults())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutHandler(createCompositeLogoutHandler())
-                )
+                        .logoutHandler(createCompositeLogoutHandler()))
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .build();
     }
@@ -49,8 +47,7 @@ public class SecurityConfig {
                                     .path("/")
                                     .build());
                     return Mono.empty();
-                }
-        );
+                });
     }
 
     @Bean

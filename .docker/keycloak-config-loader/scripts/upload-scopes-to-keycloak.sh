@@ -1,6 +1,7 @@
 #!/bin/bash
 
 KEYCLOAK_URL="http://keycloak.test.local/"
+#KEYCLOAK_URL="http://localhost:8080/"
 REALM="master"
 CLIENT_ID="admin-cli"
 USERNAME="admin"
