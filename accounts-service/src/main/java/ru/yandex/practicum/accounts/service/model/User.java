@@ -21,5 +21,6 @@ public class User {
     private String password;
 //    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private OffsetDateTime birthdate;
+    @Builder.Default
     private List<Account> accounts = new ArrayList<>();
 }
