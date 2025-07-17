@@ -4,6 +4,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.model.Currency;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Random;
@@ -15,6 +16,8 @@ public class CurrencyGeneratorService {
     private final CurrencyRateProducer currencyRateProducer;
     private final Random random;
     private final List<String> currencyCodes;
+    @Autowired
+    private CurrencyUpdateMetrics currencyUpdateMetrics;
 
     public CurrencyGeneratorService(CurrencyRateProducer currencyRateProducer) {
         this.currencyRateProducer = currencyRateProducer;
@@ -28,7 +31,11 @@ public class CurrencyGeneratorService {
             double newRate = 1.0 + random.nextDouble() * 2.0;
             double roundedRate = Math.round(newRate * 100.0) / 100.0;
             Currency updatedCurrency = new Currency(code, getTitleForCode(code), roundedRate);
-            currencyRateProducer.sendCurrencyRate(updatedCurrency);
+            try {
+                currencyRateProducer.sendCurrencyRate(updatedCurrency);
+            } catch (Exception e) {
+                currencyUpdateMetrics.incrementCurrencyUpdateFailure(code);
+            }
         });
     }
 
