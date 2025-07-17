@@ -9,12 +9,15 @@ import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClient
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.front.ui.feature.account.model.User;
 import ru.yandex.practicum.front.ui.feature.account.request.CreateUserRequest;
 import ru.yandex.practicum.front.ui.feature.account.request.EditPasswordRequest;
 
+@Slf4j
 @Component
 public class AccountsServiceClient {
 
@@ -23,7 +26,12 @@ public class AccountsServiceClient {
     private ReactiveOAuth2AuthorizedClientManager manager;
 
     public AccountsServiceClient(WebClient.Builder webClientBuilder, @Value("${account.service.url}") String baseUrl) {
-        this.accountsServiceWebClient = webClientBuilder.baseUrl(baseUrl).build();
+        this.accountsServiceWebClient = webClientBuilder.baseUrl(baseUrl)
+        .filter((clientRequest, next) -> {
+                log.info("External Request Headers: {}", clientRequest.headers());
+                return next.exchange(clientRequest);
+            })
+        .build();
     }
 
     public Mono<User> createUser(CreateUserRequest request) {
