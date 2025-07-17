@@ -27,6 +27,8 @@ public class TransferController {
     private ObjectMapper objectMapper;
     @Autowired
     private AccountController accountController;
+    @Autowired
+    private TransferMetrics transferMetrics;
 
     @PostMapping(value = "/user/{login}/transfer")
     public Mono<String> transfer(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -43,6 +45,12 @@ public class TransferController {
             CustomUserDetails userDetails,
             Model model,
             TransferRequest request) {
+        transferMetrics.incrementFailedTransfer(
+            request.getLogin(),
+            request.getToLogin(),
+            request.getFromCurrency(),
+            request.getToCurrency()
+        );
         return Mono.fromCallable(() -> {
             ErrorResponse error = objectMapper.readValue(ex.getResponseBodyAsString(),
                     ErrorResponse.class);

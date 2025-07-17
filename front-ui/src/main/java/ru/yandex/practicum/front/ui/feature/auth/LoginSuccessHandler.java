@@ -7,6 +7,9 @@ import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ServerWebExchange;
+import java.net.URI;
 
 @Component
 public class LoginSuccessHandler implements ServerAuthenticationSuccessHandler {
@@ -24,6 +27,10 @@ public class LoginSuccessHandler implements ServerAuthenticationSuccessHandler {
                 .tag("login", username)
                 .register(meterRegistry)
                 .increment();
-        return webFilterExchange.getChain().filter(webFilterExchange.getExchange());
+        // Редирект на главную страницу
+        ServerWebExchange exchange = webFilterExchange.getExchange();
+        exchange.getResponse().setStatusCode(HttpStatus.FOUND);
+        exchange.getResponse().getHeaders().setLocation(URI.create("/main"));
+        return exchange.getResponse().setComplete();
     }
 } 
