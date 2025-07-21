@@ -15,34 +15,38 @@ import ru.yandex.practicum.transfer.service.model.Account;
 import ru.yandex.practicum.transfer.service.model.Currency;
 import ru.yandex.practicum.transfer.service.model.User;
 import ru.yandex.practicum.transfer.service.response.OperationCheckResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+
 
 import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TransferService {
     private static final String TRANSFER_OPERATION = "TRANSFER";
     private static final String ACCOUNT_NOT_FOUND_MESSAGE = "Аккаунт с валютой %s не найден";
     private static final String INSUFFICIENT_FUNDS_MESSAGE = "На счету %s недостаточно средств";
     
+    private static final Logger logger = LoggerFactory.getLogger(TransferService.class);
+
     private final AccountsServiceClient accountsServiceClient;
     private final ExchangeServiceClient exchangeServiceClient;
     private final BlockerServiceClient blockerServiceClient;
     private final NotificationProducer notificationProducer;
 
-    public TransferService(AccountsServiceClient accountsServiceClient,
-                         ExchangeServiceClient exchangeServiceClient,
-                         BlockerServiceClient blockerServiceClient,
-                           NotificationProducer notificationProducer) {
-        this.accountsServiceClient = accountsServiceClient;
-        this.exchangeServiceClient = exchangeServiceClient;
-        this.blockerServiceClient = blockerServiceClient;
-        this.notificationProducer = notificationProducer;
-    }
-
     public Mono<Void> transfer(TransferRequest request) {
+        logger.info("Выполнение перевода: пользователь={}, от={}, к={}, сумма={}, валюта={}", 
+                request.getLogin(), request.getFromCurrency(), request.getToCurrency(), request.getValue(), request.getToLogin());
+        
         return validateTransfer(request)
-                .flatMap(this::processTransfer);
+                .flatMap(this::processTransfer)
+                .doOnSuccess(result -> logger.info("Перевод успешно выполнен: пользователь={}, сумма={}", 
+                        request.getLogin(), request.getValue()))
+                .doOnError(e -> logger.error("Ошибка при выполнении перевода: пользователь={}, ошибка={}", 
+                        request.getLogin(), e.getMessage()));
     }
 
     private Mono<Void> processTransfer(TransferRequest request) {
