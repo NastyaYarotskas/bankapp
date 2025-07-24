@@ -1,38 +1,32 @@
 package ru.yandex.practicum.accounts.service.config;
 
-import brave.Tracer;
+import io.micrometer.tracing.Span;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-@Configuration
+@Slf4j
+@Component
 public class LoggingConfig implements WebFilter {
-
-    private final Tracer tracer;
-
-    public LoggingConfig(Tracer tracer) {
-        this.tracer = tracer;
-    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         return chain.filter(exchange)
-                .contextWrite(context -> {
-                    // Получаем текущий span
-                    brave.Span currentSpan = tracer.currentSpan();
-                    if (currentSpan != null) {
-                        // Добавляем trace id и span id в MDC
-                        MDC.put("traceId", currentSpan.context().traceIdString());
-                        MDC.put("spanId", currentSpan.context().spanIdString());
+                .contextWrite(ctx -> {
+                    Span span = ctx.getOrDefault(Span.class, null);
+                    if (span != null) {
+                        MDC.put("traceId", span.context().traceId());
+                        MDC.put("spanId", span.context().spanId());
                     }
-                    return context;
+                    return ctx;
                 })
                 .doFinally(signalType -> {
-                    // Очищаем MDC после завершения запроса
+                    // важно очищать MDC после завершения запроса!
                     MDC.clear();
                 });
     }
-} 
+}
