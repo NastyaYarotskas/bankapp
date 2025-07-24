@@ -1,6 +1,7 @@
 package ru.yandex.practicum.accounts.service.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.Span;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,18 +18,52 @@ import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMe
 @Service
 public class AccountService {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
+    private final Tracer tracer;
+
+    public AccountService(AccountRepository accountRepository, Tracer tracer) {
+        this.accountRepository = accountRepository;
+        this.tracer = tracer;
+    }
 
     public Flux<AccountEntity> createAccounts(Flux<AccountEntity> accounts) {
-        return accountRepository.saveAll(accounts);
+        Span parent = tracer.currentSpan();
+        Span span = tracer.nextSpan(parent).name("create-accounts").start();
+
+        return accountRepository.saveAll(accounts)
+                .doOnSubscribe(sub -> span.tag("event", "Started DB call"))
+                .doOnComplete(() -> span.tag("event", "Completed DB call"))
+                .doOnError(error -> {
+                    span.tag("error", error.getMessage());
+                    span.error(error);
+                })
+                .doFinally(signalType -> {
+                    span.tag("event", "Finished signal: " + signalType.name());
+                    span.end();
+                });
     }
 
     public Flux<AccountEntity> findByUserId(UUID userId) {
-        return accountRepository.findByUserId(userId);
+        Span parent = tracer.currentSpan();
+        Span span = tracer.nextSpan(parent).name("find-accounts-by-user-id").start();
+        
+        return accountRepository.findByUserId(userId)
+                .doOnSubscribe(sub -> span.tag("event", "Started DB call"))
+                .doOnComplete(() -> span.tag("event", "Completed DB call"))
+                .doOnError(error -> {
+                    span.tag("error", error.getMessage());
+                    span.error(error);
+                })
+                .doFinally(signalType -> {
+                    span.tag("event", "Finished signal: " + signalType.name());
+                    span.end();
+                });
     }
 
     public Flux<AccountEntity> updateAccounts(UUID userId, Flux<AccountEntity> accounts) {
+        Span parent = tracer.currentSpan();
+        Span span = tracer.nextSpan(parent).name("update-accounts").start();
+
         return accounts
                 .flatMap(account -> {
                     if (account.getId() == null) {
@@ -41,6 +76,16 @@ public class AccountService {
                                 account.setUserId(userId);
                                 return accountRepository.save(account);
                             });
+                })
+                .doOnSubscribe(sub -> span.tag("event", "Started DB call"))
+                .doOnComplete(() -> span.tag("event", "Completed DB call"))
+                .doOnError(error -> {
+                    span.tag("error", error.getMessage());
+                    span.error(error);
+                })
+                .doFinally(signalType -> {
+                    span.tag("event", "Finished signal: " + signalType.name());
+                    span.end();
                 });
     }
 }
