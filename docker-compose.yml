@@ -174,6 +174,8 @@ services:
       - xpack.security.enabled=false
     ports:
       - "9200:9200"
+    networks:
+      - kafka-net
 
   kibana:
     image: kibana:8.12.0
@@ -183,6 +185,8 @@ services:
       - "5601:5601"
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - kafka-net
 
   logstash:
     image: logstash:8.12.0
@@ -193,6 +197,8 @@ services:
       - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
     ports:
       - "5044:5044"
+    networks:
+      - kafka-net
 
 
 networks:
