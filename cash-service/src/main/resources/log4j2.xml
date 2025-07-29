@@ -2,8 +2,8 @@
 <Configuration status="WARN">
     <Properties>
         <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%X{traceId:-}] [%X{spanId:-}] %-5level %logger{36} - %msg%n</Property>
-        <Property name="KAFKA_BOOTSTRAP_SERVERS">localhost:29092</Property>
-        <Property name="KAFKA_TOPIC">application-logs</Property>
+        <Property name="KAFKA_BOOTSTRAP_SERVERS">${env:KAFKA_URL:-localhost:29092}</Property>
+        <Property name="KAFKA_TOPIC">${env:KAFKA_TOPIC:-application-logs}</Property>
     </Properties>
 
     <Appenders>
