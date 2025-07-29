@@ -1,7 +1,6 @@
 package ru.yandex.practicum.cash.service.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -11,9 +10,11 @@ import ru.yandex.practicum.cash.service.model.User;
 @Component
 public class AccountsServiceClient extends BaseClient {
 
-    @Autowired
-    @Qualifier("accountsServiceWebClient")
-    private WebClient accountsServiceWebClient;
+    private final WebClient accountsServiceWebClient;
+
+    public AccountsServiceClient(WebClient.Builder webClientBuilder, @Value("${account.service.url}") String baseUrl) {
+        this.accountsServiceWebClient = webClientBuilder.baseUrl(baseUrl).build();
+    }
 
     public Mono<User> getAccountDetails(String login) {
         return retrieveToken()

@@ -23,6 +23,8 @@ management:
     health:
       probes:
         enabled: true
+  tracing:
+    enabled: true
 
 spring:
   application:
@@ -41,3 +43,16 @@ spring:
             client-secret: ${CLIENT_SECRET:LLtTlDhsJJ2lfN5c0oHtcb0zdLQyvkXQ}
             scope: exchange.read,accounts.read,accounts.write,cash.write,transfer.write
             clientAuthenticationMethod: client_secret_post
+
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://127.0.0.1:9411}/api/v2/spans # Эндпоинт Zipkin для приёма спанов
+  tracing:
+    sampling:
+      probability: 1 # Сэмплируем все запросы
+
+logging:
+  level:
+    org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG
+    org.springframework.web.reactive.function.client.ExchangeFilterFunction: DEBUG
+    reactor.netty.http.client: DEBUG

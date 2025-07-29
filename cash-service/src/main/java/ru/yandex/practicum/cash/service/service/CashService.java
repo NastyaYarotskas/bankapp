@@ -1,23 +1,29 @@
 package ru.yandex.practicum.cash.service.service;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.cash.service.client.AccountsServiceClient;
 import ru.yandex.practicum.cash.service.client.BlockerServiceClient;
-import ru.yandex.practicum.cash.service.request.CashChangeRequest;
-import ru.yandex.practicum.cash.service.request.OperationRequest;
 import ru.yandex.practicum.cash.service.model.Account;
 import ru.yandex.practicum.cash.service.model.User;
+import ru.yandex.practicum.cash.service.request.CashChangeRequest;
+import ru.yandex.practicum.cash.service.request.OperationRequest;
 import ru.yandex.practicum.model.NotificationRequest;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CashService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CashService.class);
     private static final String ERROR_EMPTY_REQUEST = "Запрос или валюта не могут быть пустыми";
     private static final String ERROR_NEGATIVE_AMOUNT = "Сумма должна быть больше нуля";
     private static final String ERROR_ACCOUNT_NOT_FOUND = "Счет с указанной валютой не найден";
@@ -31,26 +37,34 @@ public class CashService {
     private NotificationProducer notificationProducer;
 
     public Mono<Void> processAccountTransaction(String login, CashChangeRequest request) {
+        logger.info("Обработка транзакции: пользователь={}, валюта={}, действие={}, сумма={}",
+                login, request.getCurrency(), request.getAction(), request.getValue());
+
         return validateRequest(request)
-                .flatMap(validRequest ->
-                        blockerServiceClient.performOperation(new OperationRequest(login, request.getAction().name(), request.getValue()))
-                                .flatMap(checkResult -> {
-                                    if (checkResult.blocked()) {
-                                        return Mono.error(new ResponseStatusException(
-                                                HttpStatus.FORBIDDEN,
-                                                checkResult.message()
-                                        ));
-                                    }
-                                    return processAccountOperation(login, validRequest);
-                                }))
+                .flatMap(validRequest -> blockerServiceClient
+                        .performOperation(new OperationRequest(login, request.getAction().name(), request.getValue()))
+                        .flatMap(checkResult -> {
+                            if (checkResult.blocked()) {
+                                logger.warn("Операция заблокирована: пользователь={}, валюта={}, причина={}",
+                                        login, request.getCurrency(), checkResult.message());
+                                return Mono.error(new ResponseStatusException(
+                                        HttpStatus.FORBIDDEN,
+                                        checkResult.message()));
+                            }
+                            return processAccountOperation(login, validRequest);
+                        }))
                 .flatMap(result -> {
+                    logger.info("Транзакция успешно выполнена: пользователь={}, валюта={}, действие={}",
+                            login, request.getCurrency(), request.getAction());
                     sendNotification(login, "Операция прошла успешно");
                     return Mono.just(result);
                 })
                 .onErrorResume(error -> {
-                    String errorMessage = error instanceof ResponseStatusException ?
-                            ((ResponseStatusException) error).getReason() :
-                            "Операция была отменена: " + error.getMessage();
+                    logger.error("Ошибка при выполнении транзакции: пользователь={}, валюта={}, ошибка={}",
+                            login, request.getCurrency(), error.getMessage());
+                    String errorMessage = error instanceof ResponseStatusException
+                            ? ((ResponseStatusException) error).getReason()
+                            : "Операция была отменена: " + error.getMessage();
                     sendNotification(login, errorMessage);
                     return Mono.error(error);
                 })
@@ -90,8 +104,8 @@ public class CashService {
     private Account findAccountByCurrency(User user, String currency) {
         return user.getAccounts().stream()
                 .filter(acc -> acc.getCurrency() != null &&
-                               acc.getCurrency().getName().equals(currency) &&
-                               acc.isExists())
+                        acc.getCurrency().getName().equals(currency) &&
+                        acc.isExists())
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ERROR_ACCOUNT_NOT_FOUND));
     }

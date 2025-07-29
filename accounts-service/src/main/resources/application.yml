@@ -1,6 +1,11 @@
 server:
   port: 9001
 
+micrometer:
+  tracing:
+    propagation:
+      type: B3 # или W3C если используешь OTel
+
 management:
   endpoints:
     web:
@@ -10,6 +15,12 @@ management:
     health:
       probes:
         enabled: true
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://127.0.0.1:9411}/api/v2/spans # Эндпоинт Zipkin для приёма спанов
+  tracing:
+    sampling:
+      probability: 1 # Сэмплируем все запросы 
 
 spring:
   application:
@@ -52,9 +63,21 @@ spring:
             client-secret: ${CLIENT_SECRET:PAsZ470oShhYzY9qlVy35yty0tcWZhp7}
             scope: notification.write
             clientAuthenticationMethod: client_secret_post
+  zipkin:
+    base-url: http://zipkin:9411
+    enabled: true
+    service:
+      name: accounts-service
+  sleuth:
+    sampler:
+      probability: 1.0
 
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     enabled: true
+
+logging:
+  level:
+    ru.yandex.practicum.accounts.service.config.RequestLoggingFilter: DEBUG

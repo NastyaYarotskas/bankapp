@@ -1,7 +1,6 @@
 package ru.yandex.practicum.transfer.service.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -11,9 +10,11 @@ import ru.yandex.practicum.transfer.service.model.Currency;
 @Component
 public class ExchangeServiceClient extends BaseClient {
 
-    @Autowired
-    @Qualifier("exchangeServiceWebClient")
-    private WebClient exchangeServiceWebClient;
+    private final WebClient exchangeServiceWebClient;
+
+    public ExchangeServiceClient(WebClient.Builder webClientBuilder, @Value("${exchange.service.url}") String baseUrl) {
+        this.exchangeServiceWebClient = webClientBuilder.baseUrl(baseUrl).build();
+    }
 
     public Flux<Currency> getCurrencyRates() {
         return retrieveToken()

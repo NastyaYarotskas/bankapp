@@ -2,9 +2,7 @@ package ru.yandex.practicum.front.ui.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -15,6 +13,10 @@ import org.springframework.security.web.server.authentication.logout.DelegatingS
 import org.springframework.security.web.server.authentication.logout.SecurityContextServerLogoutHandler;
 import org.springframework.security.web.server.authentication.logout.ServerLogoutHandler;
 import org.springframework.security.web.server.authentication.logout.WebSessionServerLogoutHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.yandex.practicum.front.ui.feature.auth.LoginSuccessHandler;
+import ru.yandex.practicum.front.ui.feature.auth.LoginFailureHandler;
+
 import reactor.core.publisher.Mono;
 
 @Configuration
@@ -22,18 +24,24 @@ import reactor.core.publisher.Mono;
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
+    @Autowired
+    private LoginSuccessHandler loginSuccessHandler;
+    @Autowired
+    private LoginFailureHandler loginFailureHandler;
+
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         return http
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/", "/main", "/signup", "/login", "/api/rates", "/actuator/**").permitAll()
-                        .anyExchange().authenticated()
+                        .anyExchange().authenticated())
+                .formLogin(form -> form
+                        .authenticationSuccessHandler(loginSuccessHandler)
+                        .authenticationFailureHandler(loginFailureHandler)
                 )
-                .formLogin(Customizer.withDefaults())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutHandler(createCompositeLogoutHandler())
-                )
+                        .logoutHandler(createCompositeLogoutHandler()))
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .build();
     }
@@ -49,8 +57,7 @@ public class SecurityConfig {
                                     .path("/")
                                     .build());
                     return Mono.empty();
-                }
-        );
+                });
     }
 
     @Bean

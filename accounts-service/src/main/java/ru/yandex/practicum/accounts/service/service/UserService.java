@@ -32,21 +32,27 @@ import java.util.UUID;
 import static ru.yandex.practicum.accounts.service.message.UserValidationErrorMessages.*;
 import static ru.yandex.practicum.accounts.service.notification.NotificationMessages.*;
 import static ru.yandex.practicum.accounts.service.service.UserValidator.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final AccountService accountService;
     private final UserRepository userRepository;
     private final NotificationProducer notificationProducer;
 
     public Mono<User> createUser(UserCreateRequest request) {
+        logger.info("Создание пользователя: {}", request.getLogin());
         return validateRequest(request)
                 .then(validateExistingUser(request.getLogin()))
                 .then(Mono.just(request))
-                .flatMap(this::createUserWithAccounts);
+                .flatMap(this::createUserWithAccounts)
+                .doOnSuccess(user -> logger.info("Пользователь успешно создан: {}", user.getLogin()))
+                .doOnError(e -> logger.error("Ошибка при создании пользователя {}: {}", request.getLogin(), e.getMessage()));
     }
 
     private Mono<Void> validateRequest(UserCreateRequest request) {
@@ -112,6 +118,7 @@ public class UserService {
     }
 
     public Mono<User> updateUserPassword(String login, EditPasswordRequest request) {
+        logger.info("Изменение пароля для пользователя: {}", login);
         return validatePasswordChange(request.getPassword(), request.getConfirmPassword())
                 .then(findAndUpdateUser(login, request))
                 .flatMap(this::enrichWithAccounts)
@@ -119,10 +126,8 @@ public class UserService {
                 .flatMap(user -> sendNotification(login, SUCCESS_PASSWORD_UPDATE_MESSAGE)
                         .thenReturn(user)
                 )
-                .onErrorResume(error -> sendNotification(
-                        login,
-                        String.format(ERROR_PASSWORD_UPDATE_MESSAGE_TEMPLATE, error.getMessage())
-                ).then(Mono.error(error)));
+                .doOnSuccess(user -> logger.info("Пароль успешно изменён для пользователя: {}", login))
+                .doOnError(e -> logger.error("Ошибка при изменении пароля для пользователя {}: {}", login, e.getMessage()));
     }
 
     private Mono<Void> sendNotification(String login, String message) {
@@ -146,10 +151,13 @@ public class UserService {
     }
 
     public Mono<User> updateUserAccounts(String login, User user) {
+        logger.info("Обновление аккаунтов пользователя: {}", login);
         return validateUserData(user)
                 .then(processUserUpdate(login, user))
                 .flatMap(updatedUser -> sendAccountUpdateNotification(login, user.getAccounts().size())
-                        .thenReturn(updatedUser));
+                        .thenReturn(updatedUser))
+                .doOnSuccess(u -> logger.info("Аккаунты пользователя {} успешно обновлены", login))
+                .doOnError(e -> logger.error("Ошибка при обновлении аккаунтов пользователя {}: {}", login, e.getMessage()));
     }
 
     private Mono<Void> validateUserData(User user) {
